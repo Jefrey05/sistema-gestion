@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Zona Horaria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>🕐 Test de Zona Horaria - República Dominicana</h1>
+    
+    <div class="test-box">
+        <h2>Información del Sistema</h2>
+        <div class="result">
+            <span class="label">Zona Horaria del Navegador:</span>
+            <span id="timezone"></span>
+        </div>
+        <div class="result">
+            <span class="label">Offset UTC:</span>
+            <span id="offset"></span>
+        </div>
+        <div class="result">
+            <span class="label">Hora Actual del Sistema:</span>
+            <span id="current-time"></span>
+        </div>
+    </div>
+
+    <div class="test-box">
+        <h2>Prueba de Conversión</h2>
+        <div class="result">
+            <span class="label">Fecha UTC del Backend (ejemplo):</span>
+            <span id="utc-date"></span>
+        </div>
+        <div class="result">
+            <span class="label">Convertida a Hora Local:</span>
+            <span id="local-date"></span>
+        </div>
+        <div class="result">
+            <span class="label">Formato Dominicano (DD/MM/YYYY HH:MM):</span>
+            <span id="dominican-date"></span>
+        </div>
+    </div>
+
+    <div class="test-box">
+        <h2>Prueba con Fecha Real del Backend</h2>
+        <input type="text" id="backend-date" placeholder="Pega aquí una fecha del backend" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <button onclick="testBackendDate()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Probar</button>
+        <div id="backend-result" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        // Obtener información del sistema
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const offset = new Date().getTimezoneOffset() / -60;
+        
+        document.getElementById('timezone').textContent = timezone;
+        document.getElementById('offset').textContent = `UTC${offset >= 0 ? '+' : ''}${offset}`;
+        
+        // Actualizar hora actual cada segundo
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('es-DO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+        }
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+
+        // Prueba de conversión con fecha UTC simulada
+        const utcDateString = '2025-10-19T03:23:00.000000'; // Ejemplo: 3:23 AM UTC
+        const utcDate = new Date(utcDateString);
+        
+        document.getElementById('utc-date').textContent = utcDateString;
+        document.getElementById('local-date').textContent = utcDate.toString();
+        document.getElementById('dominican-date').textContent = utcDate.toLocaleString('es-DO', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        // Función para probar fechas del backend
+        function testBackendDate() {
+            const input = document.getElementById('backend-date').value;
+            const resultDiv = document.getElementById('backend-result');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div style="color: red;">Por favor ingresa una fecha</div>';
+                return;
+            }
+            
+            try {
+                const date = new Date(input);
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="label">Fecha Original:</span> ${input}
+                    </div>
+                    <div class="result">
+                        <span class="label">Convertida a Local:</span> ${date.toString()}
+                    </div>
+                    <div class="result">
+                        <span class="label">Formato Dominicano:</span> ${date.toLocaleString('es-DO', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        })}
+                    </div>
+                    <div class="result">
+                        <span class="label">Hora:</span> ${date.toLocaleTimeString('es-DO', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        })}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
