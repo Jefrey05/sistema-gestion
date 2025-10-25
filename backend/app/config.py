@@ -9,8 +9,8 @@ class Settings(BaseSettings):
     
     # Cloudinary settings
     CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME", "drimkllef")
-    CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
-    CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
+    CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "482742166129239")
+    CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "IslrY5svxDEukeAb4VN4P0ECQCQ")
     
     class Config:
         env_file = ".env"
