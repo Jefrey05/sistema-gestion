@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Usar variable de entorno o URL de producción
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://sistema-gestion-api.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
