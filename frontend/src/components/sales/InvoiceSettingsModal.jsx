@@ -136,7 +136,7 @@ const InvoiceSettingsModal = ({ onClose, onSave }) => {
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
-    return url.startsWith('http') ? url : `http://localhost:8000${url}`;
+    return url.startsWith('http') ? url : `https://sistema-gestion-api.onrender.com${url}`;
   };
 
   return (

@@ -266,14 +266,14 @@ export default function OrganizationSettings() {
       
       // Configurar logo preview de forma segura
       if (response.data.logo_url) {
-        setLogoPreview(`http://localhost:8000${response.data.logo_url}`);
+        setLogoPreview(`https://sistema-gestion-api.onrender.com${response.data.logo_url}`);
       } else {
         setLogoPreview(null);
       }
       
       // Configurar stamp preview
       if (response.data.stamp_url) {
-        setStampPreview(`http://localhost:8000${response.data.stamp_url}`);
+        setStampPreview(`https://sistema-gestion-api.onrender.com${response.data.stamp_url}`);
       } else {
         setStampPreview(null);
       }
@@ -398,7 +398,7 @@ export default function OrganizationSettings() {
       
       showNotification('success', 'Sello actualizado correctamente');
       setStampFile(null);
-      setStampPreview(response.data.stamp_url ? `http://localhost:8000${response.data.stamp_url}` : null);
+      setStampPreview(response.data.stamp_url ? `https://sistema-gestion-api.onrender.com${response.data.stamp_url}` : null);
     } catch (error) {
       console.error('Error al subir sello:', error);
       showNotification('error', 'Error al subir el sello. Inténtalo de nuevo.');

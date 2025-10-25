@@ -244,13 +244,13 @@ export const generateRentalPrintHTMLOLD2 = (rental, formatCurrency, formatDate, 
   if (organizationData?.logo_url) {
     logoUrl = organizationData.logo_url.startsWith('http') 
       ? organizationData.logo_url 
-      : `http://localhost:8000${organizationData.logo_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.logo_url}`;
   }
   
   if (organizationData?.stamp_url) {
     stampUrl = organizationData.stamp_url.startsWith('http') 
       ? organizationData.stamp_url 
-      : `http://localhost:8000${organizationData.stamp_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.stamp_url}`;
   }
   
   const companyName = organizationData?.name || 'ZIBAMED, S.R.L.';
@@ -666,7 +666,7 @@ export const generateRentalPrintHTMLOLD = (rental, formatCurrency, formatDate, o
   if (organizationData?.logo_url) {
     logoUrl = organizationData.logo_url.startsWith('http') 
       ? organizationData.logo_url 
-      : `http://localhost:8000${organizationData.logo_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.logo_url}`;
   }
   
   const companyName = organizationData?.name || 'Empresa';
@@ -833,13 +833,13 @@ export const generateSalePrintHTMLOLD2 = (sale, formatCurrency, formatDate, orga
   if (organizationData?.logo_url) {
     logoUrl = organizationData.logo_url.startsWith('http') 
       ? organizationData.logo_url 
-      : `http://localhost:8000${organizationData.logo_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.logo_url}`;
   }
   
   if (organizationData?.stamp_url) {
     stampUrl = organizationData.stamp_url.startsWith('http') 
       ? organizationData.stamp_url 
-      : `http://localhost:8000${organizationData.stamp_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.stamp_url}`;
   }
   
   const companyName = organizationData?.name || 'ZIBAMED, S.R.L.';
@@ -1229,13 +1229,13 @@ export const generateSalePrintHTMLOLD = (sale, formatCurrency, formatDate, organ
   if (organizationData?.logo_url) {
     logoUrl = organizationData.logo_url.startsWith('http') 
       ? organizationData.logo_url 
-      : `http://localhost:8000${organizationData.logo_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.logo_url}`;
   }
   
   if (organizationData?.stamp_url) {
     stampUrl = organizationData.stamp_url.startsWith('http') 
       ? organizationData.stamp_url 
-      : `http://localhost:8000${organizationData.stamp_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.stamp_url}`;
   }
   
   const companyName = organizationData?.name || 'Empresa';

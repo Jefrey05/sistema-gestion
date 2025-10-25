@@ -6,13 +6,13 @@ export const generateMedicalInvoiceHTML = (document, formatCurrency, formatDate,
   if (organizationData?.logo_url) {
     logoUrl = organizationData.logo_url.startsWith('http') 
       ? organizationData.logo_url 
-      : `http://localhost:8000${organizationData.logo_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.logo_url}`;
   }
   
   if (organizationData?.stamp_url) {
     stampUrl = organizationData.stamp_url.startsWith('http') 
       ? organizationData.stamp_url 
-      : `http://localhost:8000${organizationData.stamp_url}`;
+      : `https://sistema-gestion-api.onrender.com${organizationData.stamp_url}`;
   }
   
   const companyName = organizationData?.name || 'ZIBAMED, S.R.L.';

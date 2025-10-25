@@ -392,7 +392,7 @@ const DashboardExecutive = () => {
                   <div className="relative group">
                     <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
                     <img 
-                      src={organization.logo_url.startsWith('http') ? organization.logo_url : `http://localhost:8000${organization.logo_url}`} 
+                      src={organization.logo_url.startsWith('http') ? organization.logo_url : `https://sistema-gestion-api.onrender.com${organization.logo_url}`} 
                       alt={organization.name} 
                       className="relative w-20 h-20 rounded-2xl bg-white/95 backdrop-blur-sm p-3 object-contain shadow-2xl group-hover:scale-105 transition-transform"
                       onError={(e) => {

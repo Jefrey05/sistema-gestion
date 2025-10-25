@@ -325,7 +325,7 @@ export default function AdminOrganizations() {
                   <div className="flex items-start gap-4">
                     {org.logo_url ? (
                       <img 
-                        src={org.logo_url.startsWith('http') ? org.logo_url : `http://localhost:8000${org.logo_url}`} 
+                        src={org.logo_url.startsWith('http') ? org.logo_url : `https://sistema-gestion-api.onrender.com${org.logo_url}`} 
                         alt={org.name} 
                         className="w-12 h-12 rounded-lg object-contain bg-white p-1" 
                         onError={(e) => {

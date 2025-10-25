@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './api';
 
 export const authService = {
   async login(username, password) {
@@ -6,7 +6,7 @@ export const authService = {
     formData.append('username', username);
     formData.append('password', password);
     
-    const response = await axios.post('http://localhost:8000/api/auth/login', formData, {
+    const response = await api.post('/auth/login', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -18,12 +18,12 @@ export const authService = {
   },
 
   async register(userData) {
-    const response = await axios.post('http://localhost:8000/api/auth/register', userData);
+    const response = await api.post('/auth/register', userData);
     return response.data;
   },
 
   async getCurrentUser(token) {
-    const response = await axios.get('http://localhost:8000/api/auth/me', {
+    const response = await api.get('/auth/me', {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
