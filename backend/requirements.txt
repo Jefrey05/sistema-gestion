@@ -13,3 +13,5 @@ gunicorn
 gunicorn==21.2.0
 cloudinary
 reportlab
+pandas
+openpyxl
