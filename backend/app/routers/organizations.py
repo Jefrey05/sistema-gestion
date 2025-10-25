@@ -16,6 +16,7 @@ from .. import schemas_organization as schemas
 from .. import crud_organization as crud
 from ..auth import get_current_active_user, get_current_admin_user
 from ..models_organization import OrganizationStatus
+from ..utils.cloudinary_helper import upload_image, delete_image
 
 # Alias para facilitar el uso
 models = models_extended
@@ -189,7 +190,7 @@ async def upload_organization_logo(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """Sube el logo de la organización"""
+    """Sube el logo de la organización a Cloudinary"""
     if current_user.role != "admin":
         raise HTTPException(
             status_code=403,
@@ -203,27 +204,37 @@ async def upload_organization_logo(
             detail="El archivo debe ser una imagen"
         )
     
-    # Crear directorio para logos si no existe
-    upload_dir = Path("static/logos")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        # Leer contenido del archivo
+        file_content = await file.read()
+        
+        # Subir a Cloudinary
+        public_id = f"org_{current_user.organization_id}_logo"
+        logo_url = upload_image(
+            file_content,
+            folder="sistema-gestion/logos",
+            public_id=public_id
+        )
+        
+        if not logo_url:
+            raise HTTPException(
+                status_code=500,
+                detail="Error al subir la imagen a Cloudinary"
+            )
+        
+        # Actualizar URL del logo en la organización
+        organization = crud.update_organization_logo(db, current_user.organization_id, logo_url)
+        
+        if not organization:
+            raise HTTPException(status_code=404, detail="Organización no encontrada")
+        
+        return {"logo_url": logo_url, "message": "Logo actualizado correctamente"}
     
-    # Generar nombre único para el archivo
-    file_extension = file.filename.split(".")[-1]
-    filename = f"org_{current_user.organization_id}_{int(datetime.now().timestamp())}.{file_extension}"
-    file_path = upload_dir / filename
-    
-    # Guardar archivo
-    with file_path.open("wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Actualizar URL del logo en la organización
-    logo_url = f"/static/logos/{filename}"
-    organization = crud.update_organization_logo(db, current_user.organization_id, logo_url)
-    
-    if not organization:
-        raise HTTPException(status_code=404, detail="Organización no encontrada")
-    
-    return {"logo_url": logo_url, "message": "Logo actualizado correctamente"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al procesar la imagen: {str(e)}"
+        )
 
 
 @router.delete("/me/logo")
@@ -263,7 +274,7 @@ async def upload_organization_stamp(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """Sube el sello/firma de la organización para facturas"""
+    """Sube el sello/firma de la organización para facturas a Cloudinary"""
     if current_user.role != "admin":
         raise HTTPException(
             status_code=403,
@@ -277,30 +288,40 @@ async def upload_organization_stamp(
             detail="El archivo debe ser una imagen"
         )
     
-    # Crear directorio para sellos si no existe
-    upload_dir = Path("static/stamps")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        # Leer contenido del archivo
+        file_content = await file.read()
+        
+        # Subir a Cloudinary
+        public_id = f"org_{current_user.organization_id}_stamp"
+        stamp_url = upload_image(
+            file_content,
+            folder="sistema-gestion/stamps",
+            public_id=public_id
+        )
+        
+        if not stamp_url:
+            raise HTTPException(
+                status_code=500,
+                detail="Error al subir la imagen a Cloudinary"
+            )
+        
+        # Actualizar URL del sello en la organización
+        organization = crud.get_organization(db, current_user.organization_id)
+        if not organization:
+            raise HTTPException(status_code=404, detail="Organización no encontrada")
+        
+        organization.stamp_url = stamp_url
+        db.commit()
+        db.refresh(organization)
+        
+        return {"stamp_url": stamp_url, "message": "Sello actualizado correctamente"}
     
-    # Generar nombre único para el archivo
-    file_extension = file.filename.split(".")[-1]
-    filename = f"stamp_{current_user.organization_id}_{int(datetime.now().timestamp())}.{file_extension}"
-    file_path = upload_dir / filename
-    
-    # Guardar archivo
-    with file_path.open("wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Actualizar URL del sello en la organización
-    stamp_url = f"/static/stamps/{filename}"
-    organization = crud.get_organization(db, current_user.organization_id)
-    if not organization:
-        raise HTTPException(status_code=404, detail="Organización no encontrada")
-    
-    organization.stamp_url = stamp_url
-    db.commit()
-    db.refresh(organization)
-    
-    return {"stamp_url": stamp_url, "message": "Sello actualizado correctamente"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al procesar la imagen: {str(e)}"
+        )
 
 
 @router.delete("/me/stamp")
