@@ -40,7 +40,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 def authenticate_user(db: Session, username: str, password: str):
-    user = db.query(models.User).filter(models.User.username == username).first()
+    # Intentar buscar por username o email
+    user = db.query(models.User).filter(
+        (models.User.username == username) | (models.User.email == username)
+    ).first()
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
