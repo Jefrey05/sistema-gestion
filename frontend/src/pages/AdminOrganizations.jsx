@@ -9,6 +9,8 @@ export default function AdminOrganizations() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState(null);
   const [formData, setFormData] = useState({
     organization_name: '',
     admin_email: '',
@@ -45,9 +47,22 @@ export default function AdminOrganizations() {
     e.preventDefault();
     
     try {
+      // Guardar credenciales antes de enviar
+      const credentials = {
+        email: formData.admin_email,
+        password: formData.admin_password,
+        organization: formData.organization_name
+      };
+      
       await api.post('/organizations/admin/create', formData);
-      showNotification('success', 'Organización creada exitosamente');
+      
+      // Mostrar credenciales
+      setCreatedCredentials(credentials);
+      setShowCredentials(true);
       setShowModal(false);
+      
+      showNotification('success', 'Organización creada exitosamente');
+      
       setFormData({
         organization_name: '',
         admin_email: '',
@@ -372,6 +387,56 @@ export default function AdminOrganizations() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Credentials Modal */}
+      {showCredentials && createdCredentials && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">¡Organización Creada!</h3>
+              <p className="text-gray-600">Guarda estas credenciales para acceder al sistema</p>
+            </div>
+
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6 space-y-4">
+              <div>
+                <p className="text-sm text-blue-700 font-medium mb-1">Organización</p>
+                <p className="text-lg font-bold text-blue-900">{createdCredentials.organization}</p>
+              </div>
+              <div>
+                <p className="text-sm text-blue-700 font-medium mb-1">Email / Usuario</p>
+                <p className="text-lg font-mono font-bold text-blue-900 break-all">{createdCredentials.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-blue-700 font-medium mb-1">Contraseña</p>
+                <p className="text-lg font-mono font-bold text-blue-900">{createdCredentials.password}</p>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <div className="flex gap-3">
+                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-yellow-800">
+                  <strong>Importante:</strong> Guarda estas credenciales en un lugar seguro. 
+                  Esta es la única vez que se mostrarán.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowCredentials(false);
+                setCreatedCredentials(null);
+              }}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 font-semibold transition-all shadow-lg"
+            >
+              Entendido
+            </button>
           </div>
         </div>
       )}

@@ -1181,18 +1181,24 @@ def delete_organization(
     Elimina una organización y todos sus datos (solo super admin)
     ⚠️ ACCIÓN DESTRUCTIVA - Elimina TODO
     """
-    if current_user.organization_id is not None:
+    if current_user.role != "super_admin":
         raise HTTPException(
             status_code=403,
-            detail="Solo el administrador del sistema puede eliminar organizaciones"
+            detail="Solo el Super Admin puede eliminar organizaciones"
         )
     
-    organization = crud.delete_organization(db, organization_id)
-    
-    if not organization:
-        raise HTTPException(status_code=404, detail="Organización no encontrada")
-    
-    return {"message": "Organización eliminada correctamente"}
+    try:
+        organization = crud.delete_organization(db, organization_id)
+        
+        if not organization:
+            raise HTTPException(status_code=404, detail="Organización no encontrada")
+        
+        return {"message": "Organización eliminada correctamente"}
+    except Exception as e:
+        print(f"Error al eliminar organización: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error al eliminar: {str(e)}")
 
 
 @router.get("/stats", response_model=dict)
