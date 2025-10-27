@@ -5,7 +5,6 @@ import { CurrencyProvider } from './contexts/CurrencyContext';
 import { DateFilterProvider } from './contexts/DateFilterContext';
 import LoginNew from './pages/LoginNew';
 import AdminOrganizations from './pages/AdminOrganizations';
-import AdminUsers from './pages/AdminUsers';
 import OrganizationSettings from './pages/OrganizationSettings';
 import DashboardProfessional from './pages/DashboardProfessional';
 import DashboardExecutive from './pages/DashboardExecutive';
@@ -82,7 +81,6 @@ function App() {
             
             {/* Panel de admin */}
             <Route path="admin/organizations" element={<AdminOrganizations />} />
-            <Route path="admin/users" element={<AdminUsers />} />
           </Route>
           </Routes>
         </Router>

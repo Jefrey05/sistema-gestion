@@ -59,7 +59,6 @@ const Layout = () => {
     { path: '/movements', icon: ArrowLeftRight, label: 'Movimientos', module: 'inventory' },
     { path: '/settings', icon: Settings, label: 'Configuración', divider: true },
     { path: '/module-settings', icon: ToggleLeft, label: 'Módulos', divider: true },
-    { path: '/admin/users', icon: Users, label: 'Usuarios', adminOnly: true, divider: true },
   ];
 
   // Filtrar menú basado en módulos activos y permisos
