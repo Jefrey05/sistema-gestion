@@ -266,14 +266,24 @@ export default function OrganizationSettings() {
       
       // Configurar logo preview de forma segura
       if (response.data.logo_url) {
-        setLogoPreview(`https://sistema-gestion-api.onrender.com${response.data.logo_url}`);
+        // Si la URL ya es completa (Cloudinary), usarla directamente
+        // Si es una ruta relativa, agregar el dominio del backend
+        const logoUrl = response.data.logo_url.startsWith('http') 
+          ? response.data.logo_url 
+          : `https://sistema-gestion-api.onrender.com${response.data.logo_url}`;
+        setLogoPreview(logoUrl);
       } else {
         setLogoPreview(null);
       }
       
       // Configurar stamp preview
       if (response.data.stamp_url) {
-        setStampPreview(`https://sistema-gestion-api.onrender.com${response.data.stamp_url}`);
+        // Si la URL ya es completa (Cloudinary), usarla directamente
+        // Si es una ruta relativa, agregar el dominio del backend
+        const stampUrl = response.data.stamp_url.startsWith('http') 
+          ? response.data.stamp_url 
+          : `https://sistema-gestion-api.onrender.com${response.data.stamp_url}`;
+        setStampPreview(stampUrl);
       } else {
         setStampPreview(null);
       }
