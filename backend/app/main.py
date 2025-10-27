@@ -97,5 +97,7 @@ def read_root():
 
 
 @app.get("/health")
+@app.head("/health")
+@app.post("/health")
 def health_check():
     return {"status": "ok"}
