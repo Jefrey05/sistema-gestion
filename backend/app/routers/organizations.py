@@ -933,6 +933,12 @@ def create_organization_with_admin(
         from ..auth import get_password_hash
         username = org_data["admin_email"].split('@')[0]
         
+        print(f"📝 Creando usuario admin:")
+        print(f"   Email: {org_data['admin_email']}")
+        print(f"   Username: {username}")
+        print(f"   Full Name: {org_data['admin_full_name']}")
+        print(f"   Organization ID: {new_org.id}")
+        
         admin_user = models.User(
             email=org_data["admin_email"],
             username=username,
@@ -946,6 +952,13 @@ def create_organization_with_admin(
         db.add(admin_user)
         db.commit()
         db.refresh(new_org)
+        db.refresh(admin_user)
+        
+        print(f"✅ Usuario admin creado exitosamente (ID: {admin_user.id})")
+        print(f"   Para iniciar sesión usa:")
+        print(f"   - Email: {admin_user.email}")
+        print(f"   - Username: {admin_user.username}")
+        print(f"   - Contraseña: (la que configuraste)")
         
         return new_org
         
