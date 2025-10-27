@@ -4,9 +4,8 @@ import { useAuthStore } from './store/useAuthStore';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { DateFilterProvider } from './contexts/DateFilterContext';
 import LoginNew from './pages/LoginNew';
-import RegisterNew from './pages/RegisterNew';
-import OrganizationRegister from './pages/OrganizationRegister';
 import AdminOrganizations from './pages/AdminOrganizations';
+import AdminUsers from './pages/AdminUsers';
 import OrganizationSettings from './pages/OrganizationSettings';
 import DashboardProfessional from './pages/DashboardProfessional';
 import DashboardExecutive from './pages/DashboardExecutive';
@@ -55,8 +54,6 @@ function App() {
           <Routes>
           {/* Rutas públicas */}
           <Route path="/login" element={<LoginNew />} />
-          <Route path="/register" element={<RegisterNew />} />
-          <Route path="/register-organization" element={<OrganizationRegister />} />
           
           {/* Rutas protegidas */}
           <Route path="/" element={
@@ -83,8 +80,9 @@ function App() {
             <Route path="settings" element={<OrganizationSettings />} />
             <Route path="module-settings" element={<ModuleSettings />} />
             
-            {/* Panel de admin (solo super admin) */}
+            {/* Panel de admin */}
             <Route path="admin/organizations" element={<AdminOrganizations />} />
+            <Route path="admin/users" element={<AdminUsers />} />
           </Route>
           </Routes>
         </Router>

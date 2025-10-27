@@ -163,3 +163,147 @@ async def logout_all_sessions(
         "message": "Todas las sesiones han sido cerradas exitosamente",
         "sessions_closed": 1  # Simulado
     }
+
+
+# ============================================================================
+# GESTIÓN DE USUARIOS (Solo Admin)
+# ============================================================================
+
+@router.get("/users", response_model=list[schemas.User])
+async def get_all_users(
+    current_user: schemas.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Obtiene todos los usuarios de la organización (solo admin)"""
+    users = db.query(models.User).filter(
+        models.User.organization_id == current_user.organization_id
+    ).all()
+    return users
+
+
+@router.post("/users", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
+async def create_user_by_admin(
+    user_data: schemas.UserCreate,
+    current_user: schemas.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Crea un nuevo usuario (solo admin)"""
+    # Verificar si el email ya existe
+    existing_user = db.query(models.User).filter(
+        models.User.email == user_data.email
+    ).first()
+    
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="El email ya está registrado"
+        )
+    
+    # Crear usuario
+    hashed_password = auth.get_password_hash(user_data.password)
+    db_user = models.User(
+        email=user_data.email,
+        name=user_data.name,
+        hashed_password=hashed_password,
+        role=user_data.role,
+        organization_id=current_user.organization_id,
+        is_active=True
+    )
+    
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    
+    return db_user
+
+
+@router.put("/users/{user_id}", response_model=schemas.User)
+async def update_user_by_admin(
+    user_id: int,
+    user_data: dict,
+    current_user: schemas.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Actualiza un usuario (solo admin)"""
+    user = db.query(models.User).filter(
+        models.User.id == user_id,
+        models.User.organization_id == current_user.organization_id
+    ).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Actualizar campos
+    if 'name' in user_data:
+        user.name = user_data['name']
+    if 'email' in user_data:
+        # Verificar que el email no esté en uso
+        existing = db.query(models.User).filter(
+            models.User.email == user_data['email'],
+            models.User.id != user_id
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="El email ya está en uso")
+        user.email = user_data['email']
+    if 'role' in user_data:
+        user.role = user_data['role']
+    
+    db.commit()
+    db.refresh(user)
+    
+    return user
+
+
+@router.post("/users/{user_id}/reset-password")
+async def reset_user_password(
+    user_id: int,
+    password_data: dict,
+    current_user: schemas.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Resetea la contraseña de un usuario (solo admin)"""
+    user = db.query(models.User).filter(
+        models.User.id == user_id,
+        models.User.organization_id == current_user.organization_id
+    ).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    new_password = password_data.get('new_password')
+    if not new_password:
+        raise HTTPException(status_code=400, detail="Se requiere la nueva contraseña")
+    
+    # Actualizar contraseña
+    user.hashed_password = auth.get_password_hash(new_password)
+    db.commit()
+    
+    return {"message": "Contraseña actualizada exitosamente"}
+
+
+@router.delete("/users/{user_id}")
+async def delete_user(
+    user_id: int,
+    current_user: schemas.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Elimina un usuario (solo admin)"""
+    # No permitir que el admin se elimine a sí mismo
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=400,
+            detail="No puedes eliminar tu propio usuario"
+        )
+    
+    user = db.query(models.User).filter(
+        models.User.id == user_id,
+        models.User.organization_id == current_user.organization_id
+    ).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    db.delete(user)
+    db.commit()
+    
+    return {"message": "Usuario eliminado exitosamente"}

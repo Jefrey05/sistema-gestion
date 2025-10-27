@@ -200,20 +200,6 @@ const LoginNew = () => {
                 </button>
               </form>
 
-              <div className="mt-8 text-center">
-                <div className="p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30 backdrop-blur-sm">
-                  <p className="text-sm text-gray-200 mb-2">
-                    ¿Quieres usar el sistema para tu empresa?
-                  </p>
-                  <Link 
-                    to="/register-organization" 
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                  >
-                    <Building2 size={20} />
-                    Registra tu Organización
-                  </Link>
-                </div>
-              </div>
             </div>
 
             <div className="mt-6 text-center text-sm text-gray-400">
