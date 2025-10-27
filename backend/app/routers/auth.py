@@ -20,6 +20,12 @@ async def health_check():
     return {"status": "ok", "message": "Backend is running"}
 
 
+@router.get("/test-cors")
+async def test_cors():
+    """Endpoint de prueba para verificar CORS"""
+    return {"status": "ok", "message": "CORS is working", "cors_test": True}
+
+
 @router.post("/register", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # Verificar email
@@ -70,14 +76,14 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 
 @router.get("/me", response_model=schemas.User)
-async def read_users_me(current_user: schemas.User = Depends(auth.get_current_active_user)):
+async def read_users_me(current_user: models.User = Depends(auth.get_current_active_user)):
     return current_user
 
 
 @router.put("/change-password")
 async def change_password(
     password_data: dict,
-    current_user: schemas.User = Depends(auth.get_current_active_user),
+    current_user: models.User = Depends(auth.get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Cambia la contraseña del usuario actual"""
