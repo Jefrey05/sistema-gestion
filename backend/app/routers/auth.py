@@ -75,9 +75,27 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me")
 async def read_users_me(current_user: models.User = Depends(auth.get_current_active_user)):
-    return current_user
+    """Obtener información del usuario actual"""
+    try:
+        return {
+            "id": current_user.id,
+            "email": current_user.email,
+            "username": current_user.username,
+            "full_name": current_user.full_name,
+            "role": current_user.role,
+            "is_active": current_user.is_active,
+            "organization_id": current_user.organization_id,
+            "avatar": current_user.avatar,
+            "phone": current_user.phone,
+            "last_login": current_user.last_login.isoformat() if current_user.last_login else None,
+            "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            "updated_at": current_user.updated_at.isoformat() if current_user.updated_at else None
+        }
+    except Exception as e:
+        print(f"Error en /me: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
 
 
 @router.put("/change-password")
