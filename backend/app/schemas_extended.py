@@ -107,11 +107,6 @@ class User(UserBase):
     created_at: datetime
     updated_at: datetime
     
-    @property
-    def name(self):
-        """Alias para compatibilidad con frontend"""
-        return self.full_name
-    
     class Config:
         from_attributes = True
 
