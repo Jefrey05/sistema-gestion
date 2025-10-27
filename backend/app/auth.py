@@ -79,9 +79,18 @@ async def get_current_active_user(current_user: models.User = Depends(get_curren
 
 
 async def get_current_admin_user(current_user: models.User = Depends(get_current_active_user)):
-    if current_user.role != "admin":
+    if current_user.role not in ["admin", "super_admin"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes permisos de administrador"
+        )
+    return current_user
+
+
+async def get_current_super_admin(current_user: models.User = Depends(get_current_active_user)):
+    if current_user.role != "super_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo el Super Admin puede acceder a este recurso"
         )
     return current_user

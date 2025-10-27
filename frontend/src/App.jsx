@@ -31,7 +31,7 @@ function PrivateRoute({ children }) {
 // Componente para redirigir super admin al panel de organizaciones
 function DashboardRedirect() {
   const user = useAuthStore((state) => state.user);
-  const isSuperAdmin = user?.organization_id === null;
+  const isSuperAdmin = user?.role === 'super_admin';
   
   if (isSuperAdmin) {
     return <Navigate to="/admin/organizations" replace />;
