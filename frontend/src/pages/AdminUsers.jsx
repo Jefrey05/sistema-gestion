@@ -127,7 +127,7 @@ export default function AdminUsers() {
     setModalMode('edit');
     setSelectedUser(user);
     setFormData({
-      name: user.name,
+      name: user.full_name || user.name,
       email: user.email,
       role: user.role
     });
@@ -155,7 +155,7 @@ export default function AdminUsers() {
   };
 
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.full_name || user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -250,10 +250,10 @@ export default function AdminUsers() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {user.name.charAt(0).toUpperCase()}
+                          {(user.full_name || user.name || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{user.full_name || user.name}</div>
                         </div>
                       </div>
                     </td>
