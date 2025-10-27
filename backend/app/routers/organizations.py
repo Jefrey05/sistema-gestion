@@ -83,77 +83,99 @@ def get_my_organization(
             detail="El usuario no tiene una organización asignada. Por favor contacta al administrador."
         )
     
-    organization = crud.get_organization(db, current_user.organization_id)
-    if not organization:
-        raise HTTPException(
-            status_code=404, 
-            detail=f"Organización con ID {current_user.organization_id} no encontrada"
-        )
-    
-    # Agregar estadísticas
     try:
-        stats = crud.get_organization_stats(db, organization.id)
+        # Usar query SQL directa para evitar el modelo que tiene is_active
+        from sqlalchemy import text
+        query = text("""
+            SELECT id, name, slug, email, phone, logo_url, primary_color, secondary_color,
+                   rnc, address, city, address_number, website, invoice_email, stamp_url,
+                   clients_start_color, clients_end_color, quotations_start_color, quotations_end_color,
+                   sales_start_color, sales_end_color, rentals_start_color, rentals_end_color,
+                   products_start_color, products_end_color, categories_start_color, categories_end_color,
+                   suppliers_start_color, suppliers_end_color, goals_start_color, goals_end_color,
+                   quick_actions_start_color, quick_actions_end_color,
+                   status, subscription_plan, modules_enabled, max_users, max_products, max_storage_mb,
+                   currency, created_at, updated_at
+            FROM organizations
+            WHERE id = :org_id
+        """)
+        
+        result = db.execute(query, {"org_id": current_user.organization_id}).fetchone()
+        
+        if not result:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Organización con ID {current_user.organization_id} no encontrada"
+            )
+        
+        # Agregar estadísticas
+        try:
+            stats = crud.get_organization_stats(db, result.id)
+        except Exception as e:
+            print(f"Error al obtener estadísticas: {e}")
+            stats = {
+                "total_users": 0,
+                "total_clients": 0,
+                "total_products": 0,
+                "total_sales": 0,
+                "total_rentals": 0
+            }
+        
+        # Serializar manualmente desde el resultado SQL
+        return {
+            "id": result.id,
+            "name": result.name,
+            "slug": result.slug,
+            "email": result.email,
+            "phone": result.phone,
+            "logo_url": result.logo_url,
+            "primary_color": result.primary_color,
+            "secondary_color": result.secondary_color,
+            "status": result.status,
+            "subscription_plan": result.subscription_plan,
+            "modules_enabled": result.modules_enabled,
+            "max_users": result.max_users,
+            "max_products": result.max_products,
+            "max_storage_mb": result.max_storage_mb,
+            "currency": result.currency,
+            "rnc": result.rnc,
+            "address": result.address,
+            "city": result.city,
+            "address_number": result.address_number,
+            "website": result.website,
+            "invoice_email": result.invoice_email,
+            "stamp_url": result.stamp_url,
+            "created_at": result.created_at.isoformat() if result.created_at else None,
+            "updated_at": result.updated_at.isoformat() if result.updated_at else None,
+            # Colores de módulos
+            "clients_start_color": result.clients_start_color,
+            "clients_end_color": result.clients_end_color,
+            "quotations_start_color": result.quotations_start_color,
+            "quotations_end_color": result.quotations_end_color,
+            "sales_start_color": result.sales_start_color,
+            "sales_end_color": result.sales_end_color,
+            "rentals_start_color": result.rentals_start_color,
+            "rentals_end_color": result.rentals_end_color,
+            "products_start_color": result.products_start_color,
+            "products_end_color": result.products_end_color,
+            "categories_start_color": result.categories_start_color,
+            "categories_end_color": result.categories_end_color,
+            "suppliers_start_color": result.suppliers_start_color,
+            "suppliers_end_color": result.suppliers_end_color,
+            "goals_start_color": result.goals_start_color,
+            "goals_end_color": result.goals_end_color,
+            "quick_actions_start_color": result.quick_actions_start_color,
+            "quick_actions_end_color": result.quick_actions_end_color,
+            # Estadísticas
+            **stats
+        }
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error al obtener estadísticas: {e}")
+        print(f"Error en get_my_organization: {e}")
         import traceback
         traceback.print_exc()
-        # Si falla, usar valores por defecto
-        stats = {
-            "total_users": 0,
-            "total_clients": 0,
-            "total_products": 0,
-            "total_sales": 0,
-            "total_rentals": 0
-        }
-    
-    # Serializar manualmente
-    return {
-        "id": organization.id,
-        "name": organization.name,
-        "slug": organization.slug,
-        "email": organization.email,
-        "phone": organization.phone,
-        "logo_url": organization.logo_url,
-        "primary_color": organization.primary_color,
-        "secondary_color": organization.secondary_color,
-        "status": organization.status.value if hasattr(organization.status, 'value') else organization.status,
-        "subscription_plan": organization.subscription_plan.value if hasattr(organization.subscription_plan, 'value') else organization.subscription_plan,
-        "modules_enabled": organization.modules_enabled,
-        "max_users": organization.max_users,
-        "max_products": organization.max_products,
-        "max_storage_mb": organization.max_storage_mb,
-        "currency": organization.currency.value if hasattr(organization.currency, 'value') else organization.currency,
-        "rnc": organization.rnc,
-        "address": organization.address,
-        "city": organization.city,
-        "address_number": organization.address_number,
-        "website": organization.website,
-        "invoice_email": organization.invoice_email,
-        "stamp_url": organization.stamp_url,
-        "created_at": organization.created_at.isoformat() if organization.created_at else None,
-        "updated_at": organization.updated_at.isoformat() if organization.updated_at else None,
-        # Colores de módulos
-        "clients_start_color": organization.clients_start_color,
-        "clients_end_color": organization.clients_end_color,
-        "quotations_start_color": organization.quotations_start_color,
-        "quotations_end_color": organization.quotations_end_color,
-        "sales_start_color": organization.sales_start_color,
-        "sales_end_color": organization.sales_end_color,
-        "rentals_start_color": organization.rentals_start_color,
-        "rentals_end_color": organization.rentals_end_color,
-        "products_start_color": organization.products_start_color,
-        "products_end_color": organization.products_end_color,
-        "categories_start_color": organization.categories_start_color,
-        "categories_end_color": organization.categories_end_color,
-        "suppliers_start_color": organization.suppliers_start_color,
-        "suppliers_end_color": organization.suppliers_end_color,
-        "goals_start_color": organization.goals_start_color,
-        "goals_end_color": organization.goals_end_color,
-        "quick_actions_start_color": organization.quick_actions_start_color,
-        "quick_actions_end_color": organization.quick_actions_end_color,
-        # Estadísticas
-        **stats
-    }
+        raise HTTPException(status_code=500, detail=f"Error al obtener organización: {str(e)}")
 
 
 @router.get("/current")
@@ -164,26 +186,42 @@ def get_current_organization(
     """
     Obtiene la información básica de la organización actual
     """
-    organization = crud.get_organization(db, current_user.organization_id)
-    if not organization:
-        raise HTTPException(status_code=404, detail="Organización no encontrada")
-    
-    # Serializar manualmente
-    return {
-        "id": organization.id,
-        "name": organization.name,
-        "slug": organization.slug,
-        "email": organization.email,
-        "phone": organization.phone,
-        "logo_url": organization.logo_url,
-        "primary_color": organization.primary_color,
-        "secondary_color": organization.secondary_color,
-        "status": organization.status.value if hasattr(organization.status, 'value') else organization.status,
-        "subscription_plan": organization.subscription_plan.value if hasattr(organization.subscription_plan, 'value') else organization.subscription_plan,
-        "modules_enabled": organization.modules_enabled,
-        "currency": organization.currency.value if hasattr(organization.currency, 'value') else organization.currency,
-        "created_at": organization.created_at.isoformat() if organization.created_at else None
-    }
+    try:
+        from sqlalchemy import text
+        query = text("""
+            SELECT id, name, slug, email, phone, logo_url, primary_color, secondary_color,
+                   status, subscription_plan, modules_enabled, currency, created_at
+            FROM organizations
+            WHERE id = :org_id
+        """)
+        
+        result = db.execute(query, {"org_id": current_user.organization_id}).fetchone()
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Organización no encontrada")
+        
+        return {
+            "id": result.id,
+            "name": result.name,
+            "slug": result.slug,
+            "email": result.email,
+            "phone": result.phone,
+            "logo_url": result.logo_url,
+            "primary_color": result.primary_color,
+            "secondary_color": result.secondary_color,
+            "status": result.status,
+            "subscription_plan": result.subscription_plan,
+            "modules_enabled": result.modules_enabled,
+            "currency": result.currency,
+            "created_at": result.created_at.isoformat() if result.created_at else None
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error en get_current_organization: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
 @router.put("/me/settings", response_model=schemas.Organization)
