@@ -10,7 +10,6 @@ from .database import Base
 
 class OrganizationStatus(str, enum.Enum):
     """Estados de una organización"""
-    pending = "pending"  # Esperando aprobación
     active = "active"    # Activa y operando
     suspended = "suspended"  # Suspendida
     cancelled = "cancelled"  # Cancelada
@@ -81,8 +80,9 @@ class Organization(Base):
     quick_actions_end_color = Column(String, default="#4f46e5")
     
     # Estado y suscripción
-    status = Column(SQLEnum(OrganizationStatus), default=OrganizationStatus.pending)
-    subscription_plan = Column(SQLEnum(SubscriptionPlan), default=SubscriptionPlan.free)
+    status = Column(SQLEnum(OrganizationStatus), default=OrganizationStatus.active)
+    subscription_plan = Column(SQLEnum(SubscriptionPlan), default=SubscriptionPlan.basic)
+    is_active = Column(Boolean, default=True)
     
     # Módulos habilitados (JSON)
     modules_enabled = Column(JSON, default={
@@ -113,8 +113,6 @@ class Organization(Base):
     notes = Column(Text)  # Notas internas (para el admin)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    approved_at = Column(DateTime)  # Cuando fue aprobada
-    approved_by = Column(Integer)  # ID del admin que aprobó
     
     # Relaciones (con cascade para eliminar en cascada)
     users = relationship("User", back_populates="organization", cascade="all, delete-orphan")
@@ -131,9 +129,9 @@ class Organization(Base):
     def __repr__(self):
         return f"<Organization {self.name} ({self.status})>"
     
-    def is_active(self):
+    def check_active(self):
         """Verifica si la organización está activa"""
-        return self.status == OrganizationStatus.active
+        return self.is_active and self.status == OrganizationStatus.active
     
     def can_use_module(self, module_name):
         """Verifica si puede usar un módulo específico"""
