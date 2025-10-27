@@ -47,11 +47,6 @@ def get_organizations(
     return query.order_by(desc(Organization.created_at)).offset(skip).limit(limit).all()
 
 
-def get_pending_organizations(db: Session):
-    """Obtiene organizaciones pendientes de aprobación"""
-    return db.query(Organization).filter(
-        Organization.status == OrganizationStatus.pending
-    ).order_by(Organization.created_at).all()
 
 
 def create_organization(db: Session, org: schemas.OrganizationCreate):

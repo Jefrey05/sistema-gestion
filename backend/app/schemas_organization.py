@@ -8,7 +8,6 @@ from enum import Enum
 
 
 class OrganizationStatus(str, Enum):
-    pending = "pending"
     active = "active"
     suspended = "suspended"
     cancelled = "cancelled"
@@ -113,6 +112,7 @@ class Organization(OrganizationBase):
     logo_url: Optional[str] = None
     status: OrganizationStatus
     subscription_plan: SubscriptionPlan
+    is_active: Optional[bool] = True
     modules_enabled: Optional[Dict[str, bool]] = None
     max_users: int
     max_products: int
@@ -120,7 +120,6 @@ class Organization(OrganizationBase):
     currency: Currency
     created_at: datetime
     updated_at: datetime
-    approved_at: Optional[datetime] = None
     # Campos de facturación
     rnc: Optional[str] = None
     address: Optional[str] = None
