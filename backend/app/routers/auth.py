@@ -322,22 +322,43 @@ async def setup_super_admin(db: Session = Depends(get_db)):
     """
     try:
         # Verificar que no exista un super admin
-        existing_super_admin = db.query(models.User).filter(
-            models.User.role == "super_admin"
-        ).first()
-        
-        if existing_super_admin:
-            return {
-                "status": "error",
-                "message": "Ya existe un Super Admin en el sistema.",
-                "email": "superadmin@sistema.com"
-            }
+        try:
+            existing_super_admin = db.query(models.User).filter(
+                models.User.role == "super_admin"
+            ).first()
+            
+            if existing_super_admin:
+                return {
+                    "status": "error",
+                    "message": "Ya existe un Super Admin en el sistema.",
+                    "email": "superadmin@sistema.com"
+                }
+        except Exception as db_error:
+            # Si hay error de conexión, reintentar
+            db.rollback()
+            existing_super_admin = db.query(models.User).filter(
+                models.User.role == "super_admin"
+            ).first()
+            
+            if existing_super_admin:
+                return {
+                    "status": "error",
+                    "message": "Ya existe un Super Admin en el sistema.",
+                    "email": "superadmin@sistema.com"
+                }
         
         # Crear organización especial para super admin si no existe
         from ..models_organization import Organization
-        super_org = db.query(Organization).filter(
-            Organization.name == "Sistema Administración"
-        ).first()
+        
+        try:
+            super_org = db.query(Organization).filter(
+                Organization.name == "Sistema Administración"
+            ).first()
+        except:
+            db.rollback()
+            super_org = db.query(Organization).filter(
+                Organization.name == "Sistema Administración"
+            ).first()
         
         if not super_org:
             super_org = Organization(
@@ -376,9 +397,11 @@ async def setup_super_admin(db: Session = Depends(get_db)):
             "instructions": "Ve a https://sistema-gestion.vercel.app e inicia sesión con estas credenciales"
         }
     except Exception as e:
+        db.rollback()
         return {
             "status": "error",
-            "message": f"Error al crear super admin: {str(e)}"
+            "message": f"Error al crear super admin: {str(e)}",
+            "tip": "Intenta refrescar la página o volver a abrir la URL"
         }
 
 
