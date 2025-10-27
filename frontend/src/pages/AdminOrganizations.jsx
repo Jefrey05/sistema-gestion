@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Building2, Plus, Edit2, Trash2, Mail, Phone, MapPin, Calendar, Users, X, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { Building2, Plus, Edit2, Trash2, Mail, Phone, MapPin, Calendar, Users, X, Save, AlertCircle, CheckCircle, Key } from 'lucide-react';
 import api from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
+import ChangePasswordModal from '../components/ChangePasswordModal';
 
 export default function AdminOrganizations() {
   const { user } = useAuthStore();
@@ -11,6 +12,7 @@ export default function AdminOrganizations() {
   const [notification, setNotification] = useState(null);
   const [showCredentials, setShowCredentials] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState(null);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [formData, setFormData] = useState({
     organization_name: '',
     admin_email: '',
@@ -144,13 +146,22 @@ export default function AdminOrganizations() {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Gestión de Organizaciones</h1>
             <p className="text-gray-600">Administra las empresas registradas en el sistema</p>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2 font-semibold"
-          >
-            <Plus className="w-5 h-5" />
-            Nueva Organización
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowChangePasswordModal(true)}
+              className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all shadow-lg flex items-center gap-2 font-semibold"
+            >
+              <Key className="w-5 h-5" />
+              Cambiar Contraseña
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2 font-semibold"
+            >
+              <Plus className="w-5 h-5" />
+              Nueva Organización
+            </button>
+          </div>
         </div>
       </div>
 
@@ -455,6 +466,14 @@ export default function AdminOrganizations() {
           </div>
         </div>
       )}
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+        onSuccess={(message) => showNotification('success', message)}
+        onError={(message) => showNotification('error', message)}
+      />
     </div>
   );
 }

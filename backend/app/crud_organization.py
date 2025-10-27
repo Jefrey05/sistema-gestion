@@ -234,12 +234,68 @@ def reactivate_organization(db: Session, organization_id: int):
 
 
 def delete_organization(db: Session, organization_id: int):
-    """Elimina una organización y todos sus datos"""
+    """
+    Elimina una organización y TODOS sus datos relacionados
+    ⚠️ ACCIÓN DESTRUCTIVA - Elimina TODO
+    """
+    from .models_extended import User, Client, Product, Sale, Rental, Quotation, Category, Supplier, Movement
+    
     db_org = get_organization(db, organization_id)
-    if db_org:
+    if not db_org:
+        return None
+    
+    try:
+        # Eliminar TODOS los datos relacionados en orden
+        print(f"🗑️  Eliminando organización: {db_org.name} (ID: {organization_id})")
+        
+        # 1. Eliminar movimientos
+        movements_count = db.query(Movement).filter(Movement.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Movimientos eliminados: {movements_count}")
+        
+        # 2. Eliminar ventas
+        sales_count = db.query(Sale).filter(Sale.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Ventas eliminadas: {sales_count}")
+        
+        # 3. Eliminar alquileres
+        rentals_count = db.query(Rental).filter(Rental.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Alquileres eliminados: {rentals_count}")
+        
+        # 4. Eliminar cotizaciones
+        quotations_count = db.query(Quotation).filter(Quotation.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Cotizaciones eliminadas: {quotations_count}")
+        
+        # 5. Eliminar productos
+        products_count = db.query(Product).filter(Product.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Productos eliminados: {products_count}")
+        
+        # 6. Eliminar categorías
+        categories_count = db.query(Category).filter(Category.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Categorías eliminadas: {categories_count}")
+        
+        # 7. Eliminar proveedores
+        suppliers_count = db.query(Supplier).filter(Supplier.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Proveedores eliminados: {suppliers_count}")
+        
+        # 8. Eliminar clientes
+        clients_count = db.query(Client).filter(Client.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Clientes eliminados: {clients_count}")
+        
+        # 9. Eliminar usuarios
+        users_count = db.query(User).filter(User.organization_id == organization_id).delete(synchronize_session=False)
+        print(f"   ✓ Usuarios eliminados: {users_count}")
+        
+        # 10. Finalmente, eliminar la organización
         db.delete(db_org)
         db.commit()
-    return db_org
+        
+        print(f"✅ Organización '{db_org.name}' eliminada completamente")
+        
+        return db_org
+        
+    except Exception as e:
+        print(f"❌ Error al eliminar organización: {e}")
+        db.rollback()
+        raise e
 
 
 def get_organization_stats(db: Session, organization_id: int):
