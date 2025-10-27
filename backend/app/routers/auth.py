@@ -359,38 +359,20 @@ async def setup_super_admin(db: Session = Depends(get_db)):
             return {
                 "status": "error",
                 "message": "Ya existe un Super Admin en el sistema.",
-                "email": "superadmin@sistema.com"
+                "email": "superadmin@sistema.com",
+                "recovery_url": "/api/auth/recover-super-admin"
             }
         
-        # Crear organización especial para super admin si no existe
-        from ..models_organization import Organization
-        super_org = db.query(Organization).filter(
-            Organization.name == "Sistema Administración"
-        ).first()
-        
-        if not super_org:
-            super_org = Organization(
-                name="Sistema Administración",
-                slug="sistema-administracion",
-                email="superadmin@sistema.com",
-                phone="",
-                address="",
-                is_active=True,
-                status="active"
-            )
-            db.add(super_org)
-            db.commit()
-            db.refresh(super_org)
-        
-        # Crear SUPER ADMIN
+        # Crear SUPER ADMIN sin organización
         super_admin = models.User(
             email="superadmin@sistema.com",
             username="superadmin",
             full_name="Super Administrador",
             hashed_password=auth.get_password_hash("SuperAdmin2025!"),
             role="super_admin",
-            organization_id=super_org.id,
-            is_active=True
+            organization_id=None,
+            is_active=True,
+            phone=""
         )
         
         db.add(super_admin)
@@ -403,7 +385,7 @@ async def setup_super_admin(db: Session = Depends(get_db)):
             "email": "superadmin@sistema.com",
             "password": "SuperAdmin2025!",
             "note": "CAMBIA LA CONTRASEÑA INMEDIATAMENTE",
-            "instructions": "Ve a https://sistema-gestion.vercel.app e inicia sesión con estas credenciales"
+            "instructions": "Ve a https://sistema-gestion.vercel.app e inicia sesión"
         }
     except Exception as e:
         return {
@@ -412,7 +394,69 @@ async def setup_super_admin(db: Session = Depends(get_db)):
         }
 
 
-
-
-
-
+@router.get("/recover-super-admin")
+async def recover_super_admin(db: Session = Depends(get_db)):
+    """
+    ENDPOINT DE RECUPERACIÓN DE EMERGENCIA
+    Recrea o resetea el usuario Super Admin del sistema.
+    Úsalo SOLO si perdiste acceso al super admin.
+    """
+    try:
+        # Buscar super admin existente
+        existing = db.query(models.User).filter(
+            models.User.email == "superadmin@sistema.com"
+        ).first()
+        
+        if existing:
+            # Resetear contraseña y permisos
+            existing.hashed_password = auth.get_password_hash("SuperAdmin2025!")
+            existing.role = "super_admin"
+            existing.is_active = True
+            existing.organization_id = None
+            existing.username = "superadmin"
+            existing.full_name = "Super Administrador"
+            db.commit()
+            
+            return {
+                "status": "success",
+                "action": "recovered",
+                "message": "Super Admin recuperado exitosamente. Contraseña reseteada.",
+                "email": "superadmin@sistema.com",
+                "password": "SuperAdmin2025!",
+                "note": "⚠️ CAMBIA LA CONTRASEÑA INMEDIATAMENTE después de iniciar sesión",
+                "instructions": "Ve a https://sistema-gestion.vercel.app e inicia sesión"
+            }
+        else:
+            # Crear nuevo super admin
+            super_admin = models.User(
+                email="superadmin@sistema.com",
+                username="superadmin",
+                full_name="Super Administrador",
+                hashed_password=auth.get_password_hash("SuperAdmin2025!"),
+                role="super_admin",
+                organization_id=None,
+                is_active=True,
+                phone=""
+            )
+            
+            db.add(super_admin)
+            db.commit()
+            db.refresh(super_admin)
+            
+            return {
+                "status": "success",
+                "action": "created",
+                "message": "Super Admin creado exitosamente",
+                "email": "superadmin@sistema.com",
+                "password": "SuperAdmin2025!",
+                "note": "⚠️ CAMBIA LA CONTRASEÑA INMEDIATAMENTE",
+                "instructions": "Ve a https://sistema-gestion.vercel.app e inicia sesión"
+            }
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {
+            "status": "error",
+            "message": f"Error al recuperar super admin: {str(e)}"
+        }
