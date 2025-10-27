@@ -47,7 +47,7 @@ export default function AdminOrganizations() {
 
   useEffect(() => {
     console.log('AdminOrganizations mounted, user:', user);
-    console.log('Is super admin:', user?.organization_id === null);
+    console.log('Is super admin:', user?.role === 'super_admin');
     loadData();
   }, [activeTab]);
 
