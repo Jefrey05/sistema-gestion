@@ -938,12 +938,17 @@ def create_organization_with_admin(
         print(f"   Username: {username}")
         print(f"   Full Name: {org_data['admin_full_name']}")
         print(f"   Organization ID: {new_org.id}")
+        print(f"   Contraseña (plain): {org_data['admin_password']}")
+        
+        # Generar hash de contraseña
+        password_hash = get_password_hash(org_data["admin_password"])
+        print(f"   Hash generado: {password_hash[:50]}...")
         
         admin_user = models.User(
             email=org_data["admin_email"],
             username=username,
             full_name=org_data["admin_full_name"],
-            hashed_password=get_password_hash(org_data["admin_password"]),
+            hashed_password=password_hash,
             role="admin",
             organization_id=new_org.id,
             is_active=True,

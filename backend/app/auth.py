@@ -41,13 +41,31 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 def authenticate_user(db: Session, username: str, password: str):
     # Intentar buscar por username o email
+    print(f"🔍 Buscando usuario: {username}")
     user = db.query(models.User).filter(
         (models.User.username == username) | (models.User.email == username)
     ).first()
+    
     if not user:
+        print(f"❌ Usuario no encontrado en BD")
         return False
-    if not verify_password(password, user.hashed_password):
+    
+    print(f"✅ Usuario encontrado:")
+    print(f"   ID: {user.id}")
+    print(f"   Email: {user.email}")
+    print(f"   Username: {user.username}")
+    print(f"   Role: {user.role}")
+    print(f"   Is Active: {user.is_active}")
+    print(f"   Hash almacenado: {user.hashed_password[:50]}...")
+    
+    # Verificar contraseña
+    print(f"🔐 Verificando contraseña...")
+    is_valid = verify_password(password, user.hashed_password)
+    print(f"   Resultado: {'✅ VÁLIDA' if is_valid else '❌ INVÁLIDA'}")
+    
+    if not is_valid:
         return False
+    
     return user
 
 

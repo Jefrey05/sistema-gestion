@@ -17,18 +17,13 @@ const LoginNew = () => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const success = await login(formData.username, formData.password);
     if (success) {
       navigate('/');
     }
+    // Si falla, el error se muestra sin recargar
   };
 
   const handleChange = (e) => {
