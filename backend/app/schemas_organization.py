@@ -112,7 +112,6 @@ class Organization(OrganizationBase):
     logo_url: Optional[str] = None
     status: OrganizationStatus
     subscription_plan: SubscriptionPlan
-    is_active: Optional[bool] = True
     modules_enabled: Optional[Dict[str, bool]] = None
     max_users: int
     max_products: int

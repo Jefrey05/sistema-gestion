@@ -82,7 +82,6 @@ class Organization(Base):
     # Estado y suscripción
     status = Column(SQLEnum(OrganizationStatus), default=OrganizationStatus.active)
     subscription_plan = Column(SQLEnum(SubscriptionPlan), default=SubscriptionPlan.basic)
-    is_active = Column(Boolean, default=True)
     
     # Módulos habilitados (JSON)
     modules_enabled = Column(JSON, default={
@@ -129,9 +128,9 @@ class Organization(Base):
     def __repr__(self):
         return f"<Organization {self.name} ({self.status})>"
     
-    def check_active(self):
+    def is_active(self):
         """Verifica si la organización está activa"""
-        return self.is_active and self.status == OrganizationStatus.active
+        return self.status == OrganizationStatus.active
     
     def can_use_module(self, module_name):
         """Verifica si puede usar un módulo específico"""

@@ -118,7 +118,6 @@ def get_my_organization(
         "secondary_color": organization.secondary_color,
         "status": organization.status.value if hasattr(organization.status, 'value') else organization.status,
         "subscription_plan": organization.subscription_plan.value if hasattr(organization.subscription_plan, 'value') else organization.subscription_plan,
-        "is_active": getattr(organization, 'is_active', True),
         "modules_enabled": organization.modules_enabled,
         "max_users": organization.max_users,
         "max_products": organization.max_products,
@@ -181,7 +180,6 @@ def get_current_organization(
         "secondary_color": organization.secondary_color,
         "status": organization.status.value if hasattr(organization.status, 'value') else organization.status,
         "subscription_plan": organization.subscription_plan.value if hasattr(organization.subscription_plan, 'value') else organization.subscription_plan,
-        "is_active": getattr(organization, 'is_active', True),
         "modules_enabled": organization.modules_enabled,
         "currency": organization.currency.value if hasattr(organization.currency, 'value') else organization.currency,
         "created_at": organization.created_at.isoformat() if organization.created_at else None
@@ -800,11 +798,6 @@ def migrate_organizations(
         for org in orgs:
             updated = False
             
-            # Si no tiene is_active, establecerlo en True
-            if not hasattr(org, 'is_active') or org.is_active is None:
-                org.is_active = True
-                updated = True
-            
             # Si tiene status pending, cambiarlo a active
             if org.status == 'pending':
                 org.status = OrganizationStatus.active
@@ -892,7 +885,6 @@ def create_organization_with_admin(
             phone=org_data.get("phone", ""),
             address=org_data.get("address", ""),
             status=OrganizationStatus.active,
-            is_active=True,
             subscription_plan=org_data.get("subscription_plan", "basic"),
             max_users=1  # Solo un usuario por organización
         )
@@ -966,7 +958,6 @@ def get_all_organizations(
                 "logo_url": org.logo_url,
                 "status": org.status.value if hasattr(org.status, 'value') else org.status,
                 "subscription_plan": org.subscription_plan.value if hasattr(org.subscription_plan, 'value') else org.subscription_plan,
-                "is_active": getattr(org, 'is_active', True),
                 "address": org.address,
                 "created_at": org.created_at.isoformat() if org.created_at else None,
                 "total_users": len(org.users) if hasattr(org, 'users') else 0
