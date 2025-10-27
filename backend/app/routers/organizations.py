@@ -720,6 +720,104 @@ def reset_organization_data(
 # RUTAS DE ADMINISTRADOR (Solo para el super admin del sistema)
 # ============================================================================
 
+@router.post("/admin/create", response_model=schemas.Organization)
+def create_organization_with_admin(
+    org_data: dict,
+    current_user: models.User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Crea una nueva organización con su usuario administrador
+    Solo el super admin puede crear organizaciones
+    
+    Datos requeridos:
+    - organization_name: Nombre de la organización
+    - admin_email: Email del administrador
+    - admin_password: Contraseña del administrador
+    - admin_full_name: Nombre completo del administrador
+    - phone: Teléfono (opcional)
+    - address: Dirección (opcional)
+    """
+    # Verificar que sea super admin
+    if current_user.role != "super_admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Solo el Super Admin puede crear organizaciones"
+        )
+    
+    try:
+        # Validar datos requeridos
+        required_fields = ["organization_name", "admin_email", "admin_password", "admin_full_name"]
+        for field in required_fields:
+            if field not in org_data or not org_data[field]:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"El campo '{field}' es requerido"
+                )
+        
+        # Verificar que el email no esté en uso
+        existing_user = db.query(models.User).filter(
+            models.User.email == org_data["admin_email"]
+        ).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=400,
+                detail="El email ya está registrado en el sistema"
+            )
+        
+        # Generar slug único
+        from ..utils.slug_generator import generate_unique_slug
+        slug = generate_unique_slug(db, org_data["organization_name"])
+        
+        # Crear organización
+        new_org = Organization(
+            name=org_data["organization_name"],
+            slug=slug,
+            email=org_data["admin_email"],
+            phone=org_data.get("phone", ""),
+            address=org_data.get("address", ""),
+            status=OrganizationStatus.active,
+            is_active=True,
+            subscription_plan=org_data.get("subscription_plan", "basic"),
+            max_users=1  # Solo un usuario por organización
+        )
+        db.add(new_org)
+        db.flush()  # Para obtener el ID
+        
+        # Crear usuario administrador
+        from ..auth import get_password_hash
+        username = org_data["admin_email"].split('@')[0]
+        
+        admin_user = models.User(
+            email=org_data["admin_email"],
+            username=username,
+            full_name=org_data["admin_full_name"],
+            hashed_password=get_password_hash(org_data["admin_password"]),
+            role="admin",
+            organization_id=new_org.id,
+            is_active=True,
+            phone=org_data.get("phone", "")
+        )
+        db.add(admin_user)
+        db.commit()
+        db.refresh(new_org)
+        
+        return new_org
+        
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        print(f"Error al crear organización: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al crear organización: {str(e)}"
+        )
+
+
 @router.get("/admin/all", response_model=List[schemas.Organization])
 def get_all_organizations(
     skip: int = 0,
@@ -743,31 +841,6 @@ def get_all_organizations(
         return organizations
     except Exception as e:
         print(f"Error en get_all_organizations: {e}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
-
-
-@router.get("/admin/pending", response_model=List[schemas.Organization])
-def get_pending_organizations(
-    current_user: models.User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Obtiene organizaciones pendientes de aprobación (admin o super admin)
-    """
-    # Permitir tanto super admins como admins de organizaciones
-    if current_user.role not in ["admin", "super_admin"]:
-        raise HTTPException(
-            status_code=403,
-            detail="Solo los administradores pueden ver solicitudes pendientes"
-        )
-    
-    try:
-        organizations = crud.get_pending_organizations(db)
-        return organizations
-    except Exception as e:
-        print(f"Error en get_pending_organizations: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
