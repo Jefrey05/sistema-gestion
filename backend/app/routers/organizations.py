@@ -70,7 +70,7 @@ def register_organization(
 # RUTAS AUTENTICADAS (Usuario de una organización)
 # ============================================================================
 
-@router.get("/me", response_model=schemas.OrganizationWithStats)
+@router.get("/me")
 def get_my_organization(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -95,6 +95,8 @@ def get_my_organization(
         stats = crud.get_organization_stats(db, organization.id)
     except Exception as e:
         print(f"Error al obtener estadísticas: {e}")
+        import traceback
+        traceback.print_exc()
         # Si falla, usar valores por defecto
         stats = {
             "total_users": 0,
@@ -104,15 +106,58 @@ def get_my_organization(
             "total_rentals": 0
         }
     
-    org_dict = {
-        **organization.__dict__,
+    # Serializar manualmente
+    return {
+        "id": organization.id,
+        "name": organization.name,
+        "slug": organization.slug,
+        "email": organization.email,
+        "phone": organization.phone,
+        "logo_url": organization.logo_url,
+        "primary_color": organization.primary_color,
+        "secondary_color": organization.secondary_color,
+        "status": organization.status.value if hasattr(organization.status, 'value') else organization.status,
+        "subscription_plan": organization.subscription_plan.value if hasattr(organization.subscription_plan, 'value') else organization.subscription_plan,
+        "is_active": getattr(organization, 'is_active', True),
+        "modules_enabled": organization.modules_enabled,
+        "max_users": organization.max_users,
+        "max_products": organization.max_products,
+        "max_storage_mb": organization.max_storage_mb,
+        "currency": organization.currency.value if hasattr(organization.currency, 'value') else organization.currency,
+        "rnc": organization.rnc,
+        "address": organization.address,
+        "city": organization.city,
+        "address_number": organization.address_number,
+        "website": organization.website,
+        "invoice_email": organization.invoice_email,
+        "stamp_url": organization.stamp_url,
+        "created_at": organization.created_at.isoformat() if organization.created_at else None,
+        "updated_at": organization.updated_at.isoformat() if organization.updated_at else None,
+        # Colores de módulos
+        "clients_start_color": organization.clients_start_color,
+        "clients_end_color": organization.clients_end_color,
+        "quotations_start_color": organization.quotations_start_color,
+        "quotations_end_color": organization.quotations_end_color,
+        "sales_start_color": organization.sales_start_color,
+        "sales_end_color": organization.sales_end_color,
+        "rentals_start_color": organization.rentals_start_color,
+        "rentals_end_color": organization.rentals_end_color,
+        "products_start_color": organization.products_start_color,
+        "products_end_color": organization.products_end_color,
+        "categories_start_color": organization.categories_start_color,
+        "categories_end_color": organization.categories_end_color,
+        "suppliers_start_color": organization.suppliers_start_color,
+        "suppliers_end_color": organization.suppliers_end_color,
+        "goals_start_color": organization.goals_start_color,
+        "goals_end_color": organization.goals_end_color,
+        "quick_actions_start_color": organization.quick_actions_start_color,
+        "quick_actions_end_color": organization.quick_actions_end_color,
+        # Estadísticas
         **stats
     }
-    
-    return org_dict
 
 
-@router.get("/current", response_model=schemas.Organization)
+@router.get("/current")
 def get_current_organization(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -124,7 +169,23 @@ def get_current_organization(
     if not organization:
         raise HTTPException(status_code=404, detail="Organización no encontrada")
     
-    return organization
+    # Serializar manualmente
+    return {
+        "id": organization.id,
+        "name": organization.name,
+        "slug": organization.slug,
+        "email": organization.email,
+        "phone": organization.phone,
+        "logo_url": organization.logo_url,
+        "primary_color": organization.primary_color,
+        "secondary_color": organization.secondary_color,
+        "status": organization.status.value if hasattr(organization.status, 'value') else organization.status,
+        "subscription_plan": organization.subscription_plan.value if hasattr(organization.subscription_plan, 'value') else organization.subscription_plan,
+        "is_active": getattr(organization, 'is_active', True),
+        "modules_enabled": organization.modules_enabled,
+        "currency": organization.currency.value if hasattr(organization.currency, 'value') else organization.currency,
+        "created_at": organization.created_at.isoformat() if organization.created_at else None
+    }
 
 
 @router.put("/me/settings", response_model=schemas.Organization)
