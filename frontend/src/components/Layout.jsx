@@ -39,7 +39,7 @@ const Layout = () => {
   };
 
   // Super Admin solo ve panel de organizaciones
-  const isSuperAdmin = user?.organization_id === null;
+  const isSuperAdmin = user?.role === 'super_admin';
   
   const allMenuItems = isSuperAdmin ? [
     // Menú para Super Admin (NO tiene configuración porque no tiene organización)
