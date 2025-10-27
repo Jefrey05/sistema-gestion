@@ -4,7 +4,6 @@ import api from '../services/api';
 import Notification from '../components/Notification';
 import SystemResetModal from '../components/SystemResetModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
-import SessionManagementModal from '../components/SessionManagementModal';
 import { dashboardService } from '../services/dashboardService';
 import { organizationsService } from '../services/organizationsService';
 
@@ -18,7 +17,6 @@ export default function OrganizationSettings() {
   const [showResetModal, setShowResetModal] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [showSessionModal, setShowSessionModal] = useState(false);
   const [organizationStats, setOrganizationStats] = useState(null);
   const [showColorModal, setShowColorModal] = useState(false);
   const [isInvoiceSettingsOpen, setIsInvoiceSettingsOpen] = useState(false);
@@ -1401,18 +1399,6 @@ export default function OrganizationSettings() {
               </button>
             </div>
 
-            <div className="bg-white border border-red-200 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 mb-2">Gestión de Sesiones</h4>
-              <p className="text-sm text-gray-600 mb-4">
-                Administra las sesiones activas de tu cuenta.
-              </p>
-              <button
-                onClick={() => setShowSessionModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                Ver Sesiones Activas
-              </button>
-            </div>
           </div>
         </div>
 
@@ -1458,14 +1444,6 @@ export default function OrganizationSettings() {
       <ChangePasswordModal
         isOpen={showChangePasswordModal}
         onClose={() => setShowChangePasswordModal(false)}
-        onSuccess={(message) => showNotification('success', message)}
-        onError={(message) => showNotification('error', message)}
-      />
-
-      {/* Session Management Modal */}
-      <SessionManagementModal
-        isOpen={showSessionModal}
-        onClose={() => setShowSessionModal(false)}
         onSuccess={(message) => showNotification('success', message)}
         onError={(message) => showNotification('error', message)}
       />
