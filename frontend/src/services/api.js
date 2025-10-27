@@ -28,7 +28,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Solo redirigir si el usuario está autenticado y el token expiró
+    // NO redirigir si es un error de login (para mostrar el mensaje)
+    if (error.response?.status === 401 && sessionStorage.getItem('token')) {
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
       window.location.href = '/login';
