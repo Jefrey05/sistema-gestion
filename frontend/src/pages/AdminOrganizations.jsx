@@ -41,21 +41,6 @@ export default function AdminOrganizations() {
     }
   };
 
-  const runMigration = async () => {
-    if (!window.confirm('¿Ejecutar migración de organizaciones? Solo hazlo UNA VEZ.')) {
-      return;
-    }
-    
-    try {
-      const response = await api.get('/organizations/admin/migrate');
-      showNotification('success', response.data.message);
-      loadOrganizations();
-    } catch (error) {
-      console.error('Error en migración:', error);
-      showNotification('error', error.response?.data?.detail || 'Error en migración');
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -144,22 +129,13 @@ export default function AdminOrganizations() {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Gestión de Organizaciones</h1>
             <p className="text-gray-600">Administra las empresas registradas en el sistema</p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={runMigration}
-              className="bg-yellow-600 text-white px-4 py-3 rounded-xl hover:bg-yellow-700 transition-all shadow-lg flex items-center gap-2 font-semibold"
-              title="Ejecutar migración (solo una vez)"
-            >
-              🔄 Migrar
-            </button>
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2 font-semibold"
-            >
-              <Plus className="w-5 h-5" />
-              Nueva Organización
-            </button>
-          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2 font-semibold"
+          >
+            <Plus className="w-5 h-5" />
+            Nueva Organización
+          </button>
         </div>
       </div>
 

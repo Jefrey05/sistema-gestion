@@ -872,7 +872,7 @@ def create_organization_with_admin(
         )
 
 
-@router.get("/admin/all", response_model=List[schemas.Organization])
+@router.get("/admin/all")
 def get_all_organizations(
     skip: int = 0,
     limit: int = 100,
@@ -892,7 +892,26 @@ def get_all_organizations(
     
     try:
         organizations = crud.get_organizations(db, skip=skip, limit=limit, status=status)
-        return organizations
+        
+        # Serializar manualmente para evitar errores
+        result = []
+        for org in organizations:
+            result.append({
+                "id": org.id,
+                "name": org.name,
+                "slug": org.slug,
+                "email": org.email,
+                "phone": org.phone,
+                "logo_url": org.logo_url,
+                "status": org.status.value if hasattr(org.status, 'value') else org.status,
+                "subscription_plan": org.subscription_plan.value if hasattr(org.subscription_plan, 'value') else org.subscription_plan,
+                "is_active": getattr(org, 'is_active', True),
+                "address": org.address,
+                "created_at": org.created_at.isoformat() if org.created_at else None,
+                "total_users": len(org.users) if hasattr(org, 'users') else 0
+            })
+        
+        return result
     except Exception as e:
         print(f"Error en get_all_organizations: {e}")
         import traceback
