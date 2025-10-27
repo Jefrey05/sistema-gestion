@@ -720,6 +720,60 @@ def reset_organization_data(
 # RUTAS DE ADMINISTRADOR (Solo para el super admin del sistema)
 # ============================================================================
 
+@router.get("/admin/migrate")
+def migrate_organizations(
+    current_user: models.User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Migra organizaciones existentes para compatibilidad con nuevo modelo
+    Solo ejecutar UNA VEZ
+    """
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Solo el Super Admin puede ejecutar migraciones")
+    
+    try:
+        orgs = db.query(Organization).all()
+        migrated_count = 0
+        
+        for org in orgs:
+            updated = False
+            
+            # Si no tiene is_active, establecerlo en True
+            if not hasattr(org, 'is_active') or org.is_active is None:
+                org.is_active = True
+                updated = True
+            
+            # Si tiene status pending, cambiarlo a active
+            if org.status == 'pending':
+                org.status = OrganizationStatus.active
+                updated = True
+            
+            # Asegurar que tenga max_users
+            if not org.max_users or org.max_users == 0:
+                org.max_users = 1
+                updated = True
+            
+            if updated:
+                migrated_count += 1
+        
+        db.commit()
+        
+        return {
+            "success": True,
+            "message": f"Migración completada. {migrated_count} organizaciones actualizadas de {len(orgs)} totales.",
+            "total_organizations": len(orgs),
+            "migrated": migrated_count
+        }
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Error en migración: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error en migración: {str(e)}")
+
+
 @router.post("/admin/create", response_model=schemas.Organization)
 def create_organization_with_admin(
     org_data: dict,
