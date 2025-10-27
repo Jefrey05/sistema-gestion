@@ -732,7 +732,7 @@ def get_all_organizations(
     Obtiene todas las organizaciones (admin o super admin)
     """
     # Permitir tanto super admins como admins de organizaciones
-    if current_user.role != "admin":
+    if current_user.role not in ["admin", "super_admin"]:
         raise HTTPException(
             status_code=403,
             detail="Solo los administradores pueden ver todas las organizaciones"
@@ -757,7 +757,7 @@ def get_pending_organizations(
     Obtiene organizaciones pendientes de aprobación (admin o super admin)
     """
     # Permitir tanto super admins como admins de organizaciones
-    if current_user.role != "admin":
+    if current_user.role not in ["admin", "super_admin"]:
         raise HTTPException(
             status_code=403,
             detail="Solo los administradores pueden ver solicitudes pendientes"
