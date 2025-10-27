@@ -893,7 +893,7 @@ def create_organization_with_admin(
     
     try:
         # Validar datos requeridos
-        required_fields = ["organization_name", "admin_email", "admin_password", "admin_full_name"]
+        required_fields = ["organization_name", "admin_email", "admin_password", "admin_username"]
         for field in required_fields:
             if field not in org_data or not org_data[field]:
                 raise HTTPException(
@@ -910,6 +910,17 @@ def create_organization_with_admin(
                 status_code=400,
                 detail="El email ya está registrado en el sistema"
             )
+        
+        # Verificar que el username no esté en uso (si se proporcionó)
+        if org_data.get("admin_username"):
+            existing_username = db.query(models.User).filter(
+                models.User.username == org_data["admin_username"]
+            ).first()
+            if existing_username:
+                raise HTTPException(
+                    status_code=400,
+                    detail="El nombre de usuario ya está en uso"
+                )
         
         # Generar slug único
         from ..utils.slug_generator import generate_unique_slug
@@ -931,12 +942,15 @@ def create_organization_with_admin(
         
         # Crear usuario administrador
         from ..auth import get_password_hash
-        username = org_data["admin_email"].split('@')[0]
+        
+        # Usar el username proporcionado o generar desde email
+        username = org_data.get("admin_username")
+        if not username:
+            username = org_data["admin_email"].split('@')[0]
         
         print(f"📝 Creando usuario admin:")
         print(f"   Email: {org_data['admin_email']}")
         print(f"   Username: {username}")
-        print(f"   Full Name: {org_data['admin_full_name']}")
         print(f"   Organization ID: {new_org.id}")
         print(f"   Contraseña (plain): {org_data['admin_password']}")
         
@@ -947,7 +961,7 @@ def create_organization_with_admin(
         admin_user = models.User(
             email=org_data["admin_email"],
             username=username,
-            full_name=org_data["admin_full_name"],
+            full_name=username,  # Usar username como nombre completo
             hashed_password=password_hash,
             role="admin",
             organization_id=new_org.id,

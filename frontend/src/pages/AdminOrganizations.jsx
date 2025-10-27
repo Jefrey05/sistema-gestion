@@ -15,9 +15,9 @@ export default function AdminOrganizations() {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [formData, setFormData] = useState({
     organization_name: '',
+    admin_username: '',
     admin_email: '',
     admin_password: '',
-    admin_full_name: '',
     phone: '',
     address: '',
     subscription_plan: 'basic'
@@ -51,6 +51,7 @@ export default function AdminOrganizations() {
     try {
       // Guardar credenciales antes de enviar
       const credentials = {
+        username: formData.admin_username,
         email: formData.admin_email,
         password: formData.admin_password,
         organization: formData.organization_name
@@ -67,9 +68,9 @@ export default function AdminOrganizations() {
       
       setFormData({
         organization_name: '',
+        admin_username: '',
         admin_email: '',
         admin_password: '',
-        admin_full_name: '',
         phone: '',
         address: '',
         subscription_plan: 'basic'
@@ -337,16 +338,19 @@ export default function AdminOrganizations() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre Completo *
+                      Nombre de Usuario *
                     </label>
                     <input
                       type="text"
                       required
-                      value={formData.admin_full_name}
-                      onChange={(e) => setFormData({ ...formData, admin_full_name: e.target.value })}
+                      value={formData.admin_username}
+                      onChange={(e) => setFormData({ ...formData, admin_username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
                       className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Juan Pérez"
+                      placeholder="juanperez (sin espacios)"
+                      pattern="[a-z0-9_]+"
+                      title="Solo letras minúsculas, números y guiones bajos"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Este será el usuario para iniciar sesión</p>
                   </div>
 
                   <div>
@@ -420,8 +424,14 @@ export default function AdminOrganizations() {
                 <p className="text-lg font-bold text-blue-900">{createdCredentials.organization}</p>
               </div>
               <div>
-                <p className="text-sm text-blue-700 font-medium mb-1">Email / Usuario</p>
+                <p className="text-sm text-blue-700 font-medium mb-1">Nombre de Usuario</p>
+                <p className="text-lg font-mono font-bold text-blue-900">{createdCredentials.username}</p>
+                <p className="text-xs text-blue-600 mt-1">Usa esto para iniciar sesión</p>
+              </div>
+              <div>
+                <p className="text-sm text-blue-700 font-medium mb-1">Email</p>
                 <p className="text-lg font-mono font-bold text-blue-900 break-all">{createdCredentials.email}</p>
+                <p className="text-xs text-blue-600 mt-1">También puedes usar el email para login</p>
               </div>
               <div>
                 <p className="text-sm text-blue-700 font-medium mb-1">Contraseña</p>
