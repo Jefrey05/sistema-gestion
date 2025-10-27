@@ -982,26 +982,52 @@ def get_all_organizations(
         )
     
     try:
-        organizations = crud.get_organizations(db, skip=skip, limit=limit, status=status)
+        # Usar SQL directo para evitar el campo is_active
+        from sqlalchemy import text
         
-        # Serializar manualmente para evitar errores
-        result = []
-        for org in organizations:
-            result.append({
-                "id": org.id,
-                "name": org.name,
-                "slug": org.slug,
-                "email": org.email,
-                "phone": org.phone,
-                "logo_url": org.logo_url,
-                "status": org.status.value if hasattr(org.status, 'value') else org.status,
-                "subscription_plan": org.subscription_plan.value if hasattr(org.subscription_plan, 'value') else org.subscription_plan,
-                "address": org.address,
-                "created_at": org.created_at.isoformat() if org.created_at else None,
-                "total_users": len(org.users) if hasattr(org, 'users') else 0
+        # Query base
+        query = """
+            SELECT o.id, o.name, o.slug, o.email, o.phone, o.logo_url, 
+                   o.status, o.subscription_plan, o.address, o.created_at,
+                   COUNT(u.id) as total_users
+            FROM organizations o
+            LEFT JOIN users u ON u.organization_id = o.id
+        """
+        
+        # Agregar filtro de status si se proporciona
+        if status:
+            query += f" WHERE o.status = :status"
+        
+        query += " GROUP BY o.id, o.name, o.slug, o.email, o.phone, o.logo_url, o.status, o.subscription_plan, o.address, o.created_at"
+        query += " ORDER BY o.created_at DESC"
+        query += f" LIMIT :limit OFFSET :skip"
+        
+        # Ejecutar query
+        params = {"skip": skip, "limit": limit}
+        if status:
+            params["status"] = status.value if hasattr(status, 'value') else status
+        
+        results = db.execute(text(query), params).fetchall()
+        
+        # Serializar resultados
+        organizations = []
+        for row in results:
+            organizations.append({
+                "id": row.id,
+                "name": row.name,
+                "slug": row.slug,
+                "email": row.email,
+                "phone": row.phone,
+                "logo_url": row.logo_url,
+                "status": row.status,
+                "subscription_plan": row.subscription_plan,
+                "address": row.address,
+                "created_at": row.created_at.isoformat() if row.created_at else None,
+                "total_users": row.total_users
             })
         
-        return result
+        return organizations
+        
     except Exception as e:
         print(f"Error en get_all_organizations: {e}")
         import traceback
