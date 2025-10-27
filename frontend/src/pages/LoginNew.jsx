@@ -15,10 +15,13 @@ const LoginNew = () => {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (isAuthenticated) {
       navigate('/');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
