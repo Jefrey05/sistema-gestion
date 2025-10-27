@@ -342,10 +342,12 @@ async def setup_super_admin(db: Session = Depends(get_db)):
         if not super_org:
             super_org = Organization(
                 name="Sistema Administración",
+                slug="sistema-administracion",
                 email="superadmin@sistema.com",
                 phone="",
                 address="",
-                is_active=True
+                is_active=True,
+                status="active"
             )
             db.add(super_org)
             db.commit()
