@@ -201,9 +201,12 @@ async def create_user_by_admin(
     
     # Crear usuario
     hashed_password = auth.get_password_hash(user_data.password)
+    # Generar username desde el email
+    username = user_data.email.split('@')[0]
     db_user = models.User(
         email=user_data.email,
-        name=user_data.name,
+        username=username,
+        full_name=user_data.name,
         hashed_password=hashed_password,
         role=user_data.role,
         organization_id=current_user.organization_id,
@@ -235,7 +238,7 @@ async def update_user_by_admin(
     
     # Actualizar campos
     if 'name' in user_data:
-        user.name = user_data['name']
+        user.full_name = user_data['name']
     if 'email' in user_data:
         # Verificar que el email no esté en uso
         existing = db.query(models.User).filter(
@@ -245,6 +248,8 @@ async def update_user_by_admin(
         if existing:
             raise HTTPException(status_code=400, detail="El email ya está en uso")
         user.email = user_data['email']
+        # Actualizar username también
+        user.username = user_data['email'].split('@')[0]
     if 'role' in user_data:
         user.role = user_data['role']
     
@@ -322,43 +327,22 @@ async def setup_super_admin(db: Session = Depends(get_db)):
     """
     try:
         # Verificar que no exista un super admin
-        try:
-            existing_super_admin = db.query(models.User).filter(
-                models.User.role == "super_admin"
-            ).first()
-            
-            if existing_super_admin:
-                return {
-                    "status": "error",
-                    "message": "Ya existe un Super Admin en el sistema.",
-                    "email": "superadmin@sistema.com"
-                }
-        except Exception as db_error:
-            # Si hay error de conexión, reintentar
-            db.rollback()
-            existing_super_admin = db.query(models.User).filter(
-                models.User.role == "super_admin"
-            ).first()
-            
-            if existing_super_admin:
-                return {
-                    "status": "error",
-                    "message": "Ya existe un Super Admin en el sistema.",
-                    "email": "superadmin@sistema.com"
-                }
+        existing_super_admin = db.query(models.User).filter(
+            models.User.role == "super_admin"
+        ).first()
+        
+        if existing_super_admin:
+            return {
+                "status": "error",
+                "message": "Ya existe un Super Admin en el sistema.",
+                "email": "superadmin@sistema.com"
+            }
         
         # Crear organización especial para super admin si no existe
         from ..models_organization import Organization
-        
-        try:
-            super_org = db.query(Organization).filter(
-                Organization.name == "Sistema Administración"
-            ).first()
-        except:
-            db.rollback()
-            super_org = db.query(Organization).filter(
-                Organization.name == "Sistema Administración"
-            ).first()
+        super_org = db.query(Organization).filter(
+            Organization.name == "Sistema Administración"
+        ).first()
         
         if not super_org:
             super_org = Organization(
@@ -377,7 +361,8 @@ async def setup_super_admin(db: Session = Depends(get_db)):
         # Crear SUPER ADMIN
         super_admin = models.User(
             email="superadmin@sistema.com",
-            name="Super Administrador",
+            username="superadmin",
+            full_name="Super Administrador",
             hashed_password=auth.get_password_hash("SuperAdmin2025!"),
             role="super_admin",
             organization_id=super_org.id,
@@ -397,11 +382,9 @@ async def setup_super_admin(db: Session = Depends(get_db)):
             "instructions": "Ve a https://sistema-gestion.vercel.app e inicia sesión con estas credenciales"
         }
     except Exception as e:
-        db.rollback()
         return {
             "status": "error",
-            "message": f"Error al crear super admin: {str(e)}",
-            "tip": "Intenta refrescar la página o volver a abrir la URL"
+            "message": f"Error al crear super admin: {str(e)}"
         }
 
 
