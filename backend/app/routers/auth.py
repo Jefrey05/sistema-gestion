@@ -307,3 +307,70 @@ async def delete_user(
     db.commit()
     
     return {"message": "Usuario eliminado exitosamente"}
+
+
+# ============================================================================
+# SETUP INICIAL - Crear primer admin (Solo usar una vez)
+# ============================================================================
+
+@router.post("/setup-super-admin")
+async def setup_super_admin(db: Session = Depends(get_db)):
+    """
+    Crea el SUPER ADMIN del sistema (solo para el dueño del sistema).
+    Solo funciona si NO existe un super admin.
+    """
+    # Verificar que no exista un super admin
+    existing_super_admin = db.query(models.User).filter(
+        models.User.role == "super_admin"
+    ).first()
+    
+    if existing_super_admin:
+        raise HTTPException(
+            status_code=400,
+            detail="Ya existe un Super Admin en el sistema."
+        )
+    
+    # Crear organización especial para super admin si no existe
+    from ..models_organization import Organization
+    super_org = db.query(Organization).filter(
+        Organization.name == "Sistema Administración"
+    ).first()
+    
+    if not super_org:
+        super_org = Organization(
+            name="Sistema Administración",
+            email="superadmin@sistema.com",
+            phone="",
+            address="",
+            is_active=True
+        )
+        db.add(super_org)
+        db.commit()
+        db.refresh(super_org)
+    
+    # Crear SUPER ADMIN
+    super_admin = models.User(
+        email="superadmin@sistema.com",
+        name="Super Administrador",
+        hashed_password=auth.get_password_hash("SuperAdmin2025!"),
+        role="super_admin",
+        organization_id=super_org.id,
+        is_active=True
+    )
+    
+    db.add(super_admin)
+    db.commit()
+    db.refresh(super_admin)
+    
+    return {
+        "message": "Super Admin creado exitosamente",
+        "email": "superadmin@sistema.com",
+        "password": "SuperAdmin2025!",
+        "note": "CAMBIA LA CONTRASEÑA INMEDIATAMENTE"
+    }
+
+
+
+
+
+
