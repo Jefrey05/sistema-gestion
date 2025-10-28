@@ -6,8 +6,10 @@ import SystemResetModal from '../components/SystemResetModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import { dashboardService } from '../services/dashboardService';
 import { organizationsService } from '../services/organizationsService';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function OrganizationSettings() {
+  const { user, loadUser } = useAuthStore();
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -195,15 +197,24 @@ export default function OrganizationSettings() {
 
 
   useEffect(() => {
-    loadOrganization();
-  }, []);
+    // Asegurarse de que el usuario esté cargado antes de cargar la organización
+    const initializeSettings = async () => {
+      if (!user) {
+        await loadUser();
+      }
+      loadOrganization();
+    };
+    
+    initializeSettings();
+  }, [user]);
 
   const loadOrganization = async () => {
     try {
       // Verificar autenticación
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       
       console.log('Token exists:', !!token);
+      console.log('User loaded:', !!user);
       
       if (!token) {
         showNotification('error', 'No estás autenticado. Redirigiendo al login...');
