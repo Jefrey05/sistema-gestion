@@ -46,12 +46,18 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+import logging
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
 # Exception handler global para asegurar CORS headers en errores
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Excepción no manejada en {request.url}: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Error interno: {str(exc)}"},
+        content={"detail": "Error interno del servidor. Por favor contacte al administrador."},
         headers={
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "*",

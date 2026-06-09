@@ -82,6 +82,10 @@ function App() {
             {/* Panel de admin */}
             <Route path="admin/organizations" element={<AdminOrganizations />} />
           </Route>
+          
+          {/* Ruta Catch-all (Redirección para URLs inválidas) */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+          
           </Routes>
         </Router>
       </DateFilterProvider>

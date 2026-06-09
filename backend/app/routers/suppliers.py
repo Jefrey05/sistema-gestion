@@ -37,6 +37,8 @@ def read_supplier(
     db_supplier = crud.get_supplier(db, supplier_id=supplier_id)
     if db_supplier is None:
         raise HTTPException(status_code=404, detail="Proveedor no encontrado")
+    if db_supplier.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a este proveedor")
     return db_supplier
 
 
@@ -56,9 +58,14 @@ def update_supplier(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    db_supplier = crud.update_supplier(db, supplier_id=supplier_id, supplier=supplier)
+    # Primero verificar permisos
+    db_supplier = crud.get_supplier(db, supplier_id=supplier_id)
     if db_supplier is None:
         raise HTTPException(status_code=404, detail="Proveedor no encontrado")
+    if db_supplier.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar este proveedor")
+        
+    db_supplier = crud.update_supplier(db, supplier_id=supplier_id, supplier=supplier)
     return db_supplier
 
 
@@ -68,7 +75,12 @@ def delete_supplier(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    db_supplier = crud.delete_supplier(db, supplier_id=supplier_id)
+    # Primero verificar permisos
+    db_supplier = crud.get_supplier(db, supplier_id=supplier_id)
     if db_supplier is None:
         raise HTTPException(status_code=404, detail="Proveedor no encontrado")
+    if db_supplier.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar este proveedor")
+        
+    crud.delete_supplier(db, supplier_id=supplier_id)
     return {"message": "Proveedor eliminado exitosamente"}

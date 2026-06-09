@@ -83,6 +83,8 @@ def read_quotation(
     quotation = get_quotation(db, quotation_id)
     if not quotation:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    if quotation.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a esta cotización")
     return quotation
 
 
@@ -107,10 +109,15 @@ def update_existing_quotation(
     current_user: models.User = Depends(get_current_active_user)
 ):
     """Actualiza una cotización existente (solo si no ha sido convertida a venta o alquiler)"""
+    # Verificar IDOR
+    quotation_check = get_quotation(db, quotation_id)
+    if not quotation_check:
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    if quotation_check.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta cotización")
+        
     try:
         db_quotation = update_quotation(db, quotation_id, quotation)
-        if not db_quotation:
-            raise HTTPException(status_code=404, detail="Cotización no encontrada")
         return db_quotation
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -124,6 +131,13 @@ def update_quotation_status(
     current_user: models.User = Depends(get_current_active_user)
 ):
     """Actualiza el estado de una cotización (pendiente, aceptada, rechazada)"""
+    # Verificar IDOR
+    quotation_check = get_quotation(db, quotation_id)
+    if not quotation_check:
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    if quotation_check.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta cotización")
+        
     if status not in ["pendiente", "aceptada", "rechazada"]:
         raise HTTPException(
             status_code=400, 

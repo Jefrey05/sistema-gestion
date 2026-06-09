@@ -32,12 +32,18 @@ router = APIRouter(prefix="/api/organizations", tags=["organizations"])
 @router.post("/register", response_model=schemas.Organization, status_code=status.HTTP_201_CREATED)
 def register_organization(
     registration: schemas.OrganizationRegister,
+    current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """
-    Registro público de nueva organización
-    No requiere autenticación - es la primera pantalla que ve el cliente
+    Registro de nueva organización (Solo super_admin)
     """
+    if current_user.role != "super_admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Solo un super administrador puede registrar nuevas empresas"
+        )
+        
     # Verificar que el email no esté en uso
     existing_org = db.query(Organization).filter(
         Organization.email == registration.email
@@ -312,6 +318,23 @@ async def upload_organization_logo(
         # Leer contenido del archivo
         file_content = await file.read()
         
+        # Validar extensión real por firmas (Magic Numbers)
+        is_valid_image = False
+        if file_content.startswith(b'\xff\xd8\xff'):
+            is_valid_image = True # JPEG
+        elif file_content.startswith(b'\x89PNG\r\n\x1a\n'):
+            is_valid_image = True # PNG
+        elif file_content.startswith(b'GIF87a') or file_content.startswith(b'GIF89a'):
+            is_valid_image = True # GIF
+        elif file_content.startswith(b'RIFF') and file_content[8:12] == b'WEBP':
+            is_valid_image = True # WEBP
+            
+        if not is_valid_image:
+            raise HTTPException(
+                status_code=400,
+                detail="El archivo no es una imagen válida (falsificación de extensión detectada). Intentaste subir un archivo peligroso."
+            )
+        
         # Subir a Cloudinary
         public_id = f"org_{current_user.organization_id}_logo"
         logo_url = upload_image(
@@ -407,6 +430,23 @@ async def upload_organization_stamp(
     try:
         # Leer contenido del archivo
         file_content = await file.read()
+        
+        # Validar extensión real por firmas (Magic Numbers)
+        is_valid_image = False
+        if file_content.startswith(b'\xff\xd8\xff'):
+            is_valid_image = True # JPEG
+        elif file_content.startswith(b'\x89PNG\r\n\x1a\n'):
+            is_valid_image = True # PNG
+        elif file_content.startswith(b'GIF87a') or file_content.startswith(b'GIF89a'):
+            is_valid_image = True # GIF
+        elif file_content.startswith(b'RIFF') and file_content[8:12] == b'WEBP':
+            is_valid_image = True # WEBP
+            
+        if not is_valid_image:
+            raise HTTPException(
+                status_code=400,
+                detail="El archivo no es una imagen válida (falsificación de extensión detectada). Intentaste subir un archivo peligroso."
+            )
         
         # Subir a Cloudinary
         public_id = f"org_{current_user.organization_id}_stamp"

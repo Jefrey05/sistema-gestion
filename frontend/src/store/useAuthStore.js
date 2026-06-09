@@ -56,8 +56,15 @@ export const useAuthStore = create((set) => ({
         const user = await authService.getCurrentUser(token);
         set({ user, isAuthenticated: true });
       } catch (error) {
-        authService.logout();
-        set({ user: null, token: null, isAuthenticated: false });
+        // Solo cerrar sesión si el error es de autenticación (401) o permisos (403)
+        // No cerrar sesión si el servidor falla (500) o hay problemas de red
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            authService.logout();
+            set({ user: null, token: null, isAuthenticated: false });
+        } else {
+            // Mantener sesión autenticada pero reportar el error en consola
+            console.error("Error cargando usuario (no fatal):", error);
+        }
       }
     }
   }

@@ -63,6 +63,8 @@ def read_rental(
     rental = get_rental(db, rental_id)
     if not rental:
         raise HTTPException(status_code=404, detail="Alquiler no encontrado")
+    if rental.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a este alquiler")
     return rental
 
 
@@ -73,22 +75,22 @@ def create_new_rental(
     current_user: models.User = Depends(get_current_active_user)
 ):
     """Crea un nuevo alquiler"""
-    if current_user.role not in ["admin", "almacen", "vendedor"]:
+    if current_user.role not in ["admin", "almacen", "vendedor", "super_admin"]:
         raise HTTPException(
             status_code=403,
             detail="No tienes permisos para crear alquileres"
         )
     
     try:
-        print(f"🔵 Creando alquiler con items: {rental.items}")
+        print(f"Creando alquiler con items: {rental.items}")
         result = create_rental(db, rental, current_user.id)
-        print(f"✅ Alquiler creado: {result.rental_number}")
+        print(f"Alquiler creado: {result.rental_number}")
         return result
     except ValueError as e:
-        print(f"❌ ValueError: {e}")
+        print(f"ValueError: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        print(f"❌ Error inesperado: {e}")
+        print(f"Error inesperado: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
@@ -102,15 +104,20 @@ def update_existing_rental(
     current_user: models.User = Depends(get_current_active_user)
 ):
     """Actualiza un alquiler existente"""
-    if current_user.role not in ["admin", "almacen"]:
+    if current_user.role not in ["admin", "almacen", "super_admin"]:
         raise HTTPException(
             status_code=403,
             detail="No tienes permisos para actualizar alquileres"
         )
-    
-    db_rental = update_rental(db, rental_id, rental, current_user.id)
-    if not db_rental:
+        
+    # Verificar IDOR
+    rental_check = get_rental(db, rental_id)
+    if not rental_check:
         raise HTTPException(status_code=404, detail="Alquiler no encontrado")
+    if rental_check.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar este alquiler")
+        
+    db_rental = update_rental(db, rental_id, rental)
     return db_rental
 
 

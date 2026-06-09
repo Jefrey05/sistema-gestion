@@ -66,6 +66,8 @@ def read_product(
     db_product = crud.get_product(db, product_id=product_id)
     if db_product is None:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
+    if db_product.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a este producto")
     return db_product
 
 
@@ -92,9 +94,14 @@ def update_product(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    db_product = crud.update_product(db, product_id=product_id, product=product)
+    # Primero verificar permisos
+    db_product = crud.get_product(db, product_id=product_id)
     if db_product is None:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
+    if db_product.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar este producto")
+        
+    db_product = crud.update_product(db, product_id=product_id, product=product)
     return db_product
 
 
@@ -104,7 +111,12 @@ def delete_product(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    db_product = crud.delete_product(db, product_id=product_id)
+    # Primero verificar permisos
+    db_product = crud.get_product(db, product_id=product_id)
     if db_product is None:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
+    if db_product.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar este producto")
+        
+    crud.delete_product(db, product_id=product_id)
     return {"message": "Producto eliminado exitosamente"}

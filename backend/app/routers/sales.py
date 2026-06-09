@@ -61,6 +61,8 @@ def read_sale(
     sale = get_sale(db, sale_id)
     if not sale:
         raise HTTPException(status_code=404, detail="Venta no encontrada")
+    if sale.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a esta venta")
     return sale
 
 
@@ -95,9 +97,14 @@ def update_existing_sale(
     current_user: models.User = Depends(get_current_active_user)
 ):
     """Actualiza una venta existente"""
-    db_sale = update_sale(db, sale_id, sale)
-    if not db_sale:
+    # Verificar IDOR antes de actualizar
+    sale_check = get_sale(db, sale_id)
+    if not sale_check:
         raise HTTPException(status_code=404, detail="Venta no encontrada")
+    if sale_check.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta venta")
+        
+    db_sale = update_sale(db, sale_id, sale)
     return db_sale
 
 

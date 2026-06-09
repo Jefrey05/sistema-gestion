@@ -38,6 +38,8 @@ def read_category(
     db_category = crud.get_category(db, category_id=category_id)
     if db_category is None:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    if db_category.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a esta categoría")
     return db_category
 
 
@@ -57,9 +59,14 @@ def update_category(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    db_category = crud.update_category(db, category_id=category_id, category=category)
+    # Primero verificar permisos
+    db_category = crud.get_category(db, category_id=category_id)
     if db_category is None:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    if db_category.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta categoría")
+        
+    db_category = crud.update_category(db, category_id=category_id, category=category)
     return db_category
 
 
@@ -69,7 +76,12 @@ def delete_category(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    db_category = crud.delete_category(db, category_id=category_id)
+    # Primero verificar permisos
+    db_category = crud.get_category(db, category_id=category_id)
     if db_category is None:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    if db_category.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta categoría")
+        
+    crud.delete_category(db, category_id=category_id)
     return {"message": "Categoría eliminada exitosamente"}

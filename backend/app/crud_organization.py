@@ -248,27 +248,38 @@ def delete_organization(db: Session, organization_id: int):
         # Eliminar TODOS los datos relacionados en orden
         print(f"🗑️  Eliminando organización: {db_org.name} (ID: {organization_id})")
         
+        from sqlalchemy import text
+        
         # 1. Eliminar items de alquileres primero (FK constraint)
         try:
-            from .models_extended import RentalItem, RentalPayment
-            rental_items = db.execute(f"DELETE FROM rental_items WHERE rental_id IN (SELECT id FROM rentals WHERE organization_id = {organization_id})")
-            rental_payments = db.execute(f"DELETE FROM rental_payments WHERE rental_id IN (SELECT id FROM rentals WHERE organization_id = {organization_id})")
+            db.execute(
+                text("DELETE FROM rental_items WHERE rental_id IN (SELECT id FROM rentals WHERE organization_id = :org_id)"),
+                {"org_id": organization_id}
+            )
+            db.execute(
+                text("DELETE FROM rental_payments WHERE rental_id IN (SELECT id FROM rentals WHERE organization_id = :org_id)"),
+                {"org_id": organization_id}
+            )
             print(f"   ✓ Items y pagos de alquileres eliminados")
         except Exception as e:
             print(f"   ⚠ Error eliminando items de alquileres: {e}")
         
         # 2. Eliminar items de ventas (FK constraint)
         try:
-            from .models_extended import SaleItem
-            sale_items = db.execute(f"DELETE FROM sale_items WHERE sale_id IN (SELECT id FROM sales WHERE organization_id = {organization_id})")
+            db.execute(
+                text("DELETE FROM sale_items WHERE sale_id IN (SELECT id FROM sales WHERE organization_id = :org_id)"),
+                {"org_id": organization_id}
+            )
             print(f"   ✓ Items de ventas eliminados")
         except Exception as e:
             print(f"   ⚠ Error eliminando items de ventas: {e}")
         
         # 3. Eliminar items de cotizaciones (FK constraint)
         try:
-            from .models_extended import QuotationItem
-            quotation_items = db.execute(f"DELETE FROM quotation_items WHERE quotation_id IN (SELECT id FROM quotations WHERE organization_id = {organization_id})")
+            db.execute(
+                text("DELETE FROM quotation_items WHERE quotation_id IN (SELECT id FROM quotations WHERE organization_id = :org_id)"),
+                {"org_id": organization_id}
+            )
             print(f"   ✓ Items de cotizaciones eliminados")
         except Exception as e:
             print(f"   ⚠ Error eliminando items de cotizaciones: {e}")

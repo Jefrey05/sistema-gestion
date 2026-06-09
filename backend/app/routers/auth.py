@@ -27,7 +27,20 @@ async def test_cors():
 
 
 @router.post("/register", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
-def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def register(
+    user: schemas.UserCreate, 
+    current_user: models.User = Depends(auth.get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Registro de nuevo usuario (Solo super_admin)
+    NOTA: Para admins creando empleados, usar POST /users
+    """
+    if current_user.role != "super_admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Solo un super administrador puede usar el registro global."
+        )
     # Verificar email
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:

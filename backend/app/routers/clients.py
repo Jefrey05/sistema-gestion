@@ -36,6 +36,8 @@ def read_client(
     client = get_client(db, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    if client.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a este cliente")
     return client
 
 
@@ -46,9 +48,14 @@ def read_client_stats(
     current_user: models.User = Depends(get_current_active_user)
 ):
     """Obtiene estadísticas de un cliente"""
-    stats = get_client_stats(db, client_id)
-    if not stats:
+    # Validar permisos primero
+    client = get_client(db, client_id)
+    if not client:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    if client.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para acceder a este cliente")
+        
+    stats = get_client_stats(db, client_id)
     return stats
 
 
@@ -76,10 +83,15 @@ def update_existing_client(
     current_user: models.User = Depends(get_current_active_user)
 ):
     """Actualiza un cliente existente"""
+    # Validar permisos primero
+    db_client_check = get_client(db, client_id)
+    if not db_client_check:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    if db_client_check.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar este cliente")
+        
     try:
         db_client = update_client(db, client_id, client)
-        if not db_client:
-            raise HTTPException(status_code=404, detail="Cliente no encontrado")
         return db_client
     except ValueError as e:
         raise HTTPException(
@@ -96,11 +108,18 @@ def delete_existing_client(
 ):
     """Elimina un cliente"""
     # Verificar que el usuario sea admin
-    if current_user.role != "admin":
+    if current_user.role not in ["admin", "super_admin"]:
         raise HTTPException(
             status_code=403,
             detail="No tienes permisos para eliminar clientes"
         )
+        
+    # Validar IDOR
+    db_client = get_client(db, client_id)
+    if not db_client:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    if db_client.organization_id != current_user.organization_id and current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar este cliente")
     
     client = delete_client(db, client_id)
     if not client:

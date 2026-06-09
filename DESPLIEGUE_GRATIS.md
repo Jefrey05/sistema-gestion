@@ -16,46 +16,35 @@ Esta guía te mostrará cómo desplegar tu sistema **100% GRATIS** usando solo s
 ┌─────────────────────────────────────────────────────────────┐
 │              VERCEL (Frontend) - GRATIS                     │
 │              - React + Vite                                 │
-│              - 100GB bandwidth/mes                          │
 │              - HTTPS automático                             │
-│              - Despliegues ilimitados                       │
+│              - Despliegues ilimitados desde GitHub          │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              RENDER (Backend) - GRATIS                      │
 │              - FastAPI + Uvicorn                            │
-│              - 750 horas/mes gratis                         │
-│              - HTTPS automático                             │
 │              - Auto-deploy desde GitHub                     │
+│              - (UptimeRobot para mantener despierto)        │
 └─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│         SUPABASE (PostgreSQL) - GRATIS                      │
-│              - PostgreSQL 500MB                             │
-│              - 2 proyectos gratis                           │
-│              - Backups automáticos                          │
-│              - API REST incluida                            │
-└─────────────────────────────────────────────────────────────┘
+                 │                            │
+                 ▼                            ▼
+┌───────────────────────────┐   ┌───────────────────────────┐
+│     NEON DB (Gratis)      │   │   CLOUDINARY (Gratis)     │
+│   - PostgreSQL 512MB      │   │   - Almacenamiento img    │
+│   - Serverless rápido     │   │   - CDN optimizado        │
+└───────────────────────────┘   └───────────────────────────┘
 ```
 
-### Alternativas 100% Gratuitas:
+### Stack Exacto Utilizado:
 
-**Opción 1 (Recomendada):**
+**Opción 1 (Actual y Recomendada):**
+- Control de Versiones: **Git + GitHub**
 - Frontend: **Vercel** (gratis para siempre)
 - Backend: **Render** (750 horas/mes gratis)
-- Base de datos: **Supabase** (500MB gratis)
-
-**Opción 2:**
-- Frontend: **Netlify** (100GB/mes gratis)
-- Backend: **Render** (750 horas/mes gratis)
-- Base de datos: **ElephantSQL** (20MB gratis)
-
-**Opción 3:**
-- Frontend: **Cloudflare Pages** (ilimitado gratis)
-- Backend: **Render** (750 horas/mes gratis)
-- Base de datos: **Neon** (512MB gratis)
+- Base de datos: **Neon DB** (PostgreSQL Serverless, 512MB gratis)
+- Imágenes: **Cloudinary** (gratis)
+- Keep-Alive: **UptimeRobot** (para mantener a Render despierto)
 
 ---
 
@@ -83,26 +72,31 @@ git push -u origin main
 
 ---
 
-### Paso 2: Base de Datos en Supabase (GRATIS)
+### Paso 2: Base de Datos en Neon DB (GRATIS)
 
-1. **Ir a**: https://supabase.com
+1. **Ir a**: https://neon.tech
 2. **Crear cuenta gratis** (con GitHub)
 3. **New Project**:
    - Name: `sistema-gestion`
-   - Database Password: (genera una segura)
-   - Region: `South America (São Paulo)` (más cercano)
+   - Postgres version: (la más reciente recomendada)
+   - Region: `US East` o la que prefieras
    - Plan: **Free** ✅
 
-4. **Esperar 2 minutos** a que se cree el proyecto
-
-5. **Obtener credenciales**:
-   - Ve a **Settings** → **Database**
-   - Copia el **Connection String** (URI mode):
+4. **Obtener credenciales**:
+   - Ve al **Dashboard** de tu proyecto en Neon.
+   - Copia el **Connection String**:
    ```
-   postgresql://postgres:[PASSWORD]@db.xxx.supabase.co:5432/postgres
+   postgresql://[USUARIO]:[PASSWORD]@ep-xxx-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
    ```
 
-6. **Guardar** esta URL, la necesitarás después
+5. **Guardar** esta URL, la necesitarás en Render.
+
+---
+### Paso 2.5: Imágenes en Cloudinary (GRATIS)
+1. **Ir a**: https://cloudinary.com
+2. Crear cuenta gratis.
+3. Copiar las credenciales desde el Dashboard: `Cloud Name`, `API Key`, `API Secret`.
+4. Las necesitarás también para las Variables de Entorno del backend.
 
 ---
 
