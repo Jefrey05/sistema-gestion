@@ -72,10 +72,7 @@ const LoginNew = () => {
                 <Package className="text-white" size={40} />
               </div>
               <h1 className="text-5xl font-bold text-white leading-tight">
-                Sistema de Gestión
-                <span className="block bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                  Empresarial
-                </span>
+                Task<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Nova</span>
               </h1>
               <p className="text-xl text-gray-300">
                 Controla tu inventario, ventas, alquileres y más desde una sola plataforma
@@ -112,7 +109,7 @@ const LoginNew = () => {
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl mb-4">
                   <Package className="text-white" size={32} />
                 </div>
-                <h2 className="text-2xl font-bold text-white">Sistema de Gestión</h2>
+                <h2 className="text-2xl font-bold text-white">TaskNova</h2>
               </div>
 
               <div className="text-center mb-8">
@@ -201,7 +198,7 @@ const LoginNew = () => {
             </div>
 
             <div className="mt-6 text-center text-sm text-gray-400">
-              <p>© 2024 Sistema de Gestión Empresarial. Todos los derechos reservados.</p>
+              <p>© 2024 TaskNova. Todos los derechos reservados.</p>
             </div>
           </div>
         </div>

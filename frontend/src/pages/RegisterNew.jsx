@@ -308,7 +308,7 @@ const RegisterNew = () => {
             </div>
 
             <div className="mt-6 text-center text-sm text-gray-400">
-              <p>© 2024 Sistema de Gestión Empresarial. Todos los derechos reservados.</p>
+              <p>© 2024 TaskNova. Todos los derechos reservados.</p>
             </div>
           </div>
         </div>

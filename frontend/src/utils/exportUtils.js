@@ -19,7 +19,7 @@ export const exportToCSV = (data, filename = 'export.csv') => {
     // Header con información del reporte
     `# Reporte ZIBAMED - ${new Date().toLocaleDateString('es-ES')}`,
     `# Generado el ${new Date().toLocaleString('es-ES')}`,
-    `# Sistema de Gestión Médica`,
+    `# TaskNova`,
     '', // Línea en blanco
     // Headers de datos
     headers.join(','),
@@ -223,7 +223,7 @@ export const exportToPDF = (title, content) => {
       </div>
       <div class="footer">
         <div class="logo">ZIBAMED</div>
-        <p>Sistema de Gestión Médica</p>
+        <p>TaskNova</p>
         <p>Generado el ${new Date().toLocaleString('es-ES')}</p>
       </div>
     </div>

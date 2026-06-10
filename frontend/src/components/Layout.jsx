@@ -95,7 +95,7 @@ const Layout = () => {
                 {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent ml-2 lg:ml-0 hover:scale-105 transition-transform duration-300">
-                {isSuperAdmin ? 'Panel de Administración SaaS' : 'Sistema Empresarial'}
+                {isSuperAdmin ? 'Panel de Administración SaaS' : 'TaskNova'}
               </h1>
             </div>
             
