@@ -22,14 +22,14 @@ export const generateQuotationPrintHTMLOLD2 = (quotation, formatCurrency, format
       : `https://sistema-gestion-api.onrender.com${organizationData.stamp_url}`;
   }
   
-  const companyName = organizationData?.name || 'ZIBAMED, S.R.L.';
-  const rnc = organizationData?.rnc || '133141851';
-  const address = organizationData?.address || 'Calle Ortega y Gasset Esquina 36';
-  const city = organizationData?.city || 'Santo Domingo de Guzmán';
-  const addressNumber = organizationData?.address_number || '70';
-  const website = organizationData?.website || 'zibamed.com';
-  const invoiceEmail = organizationData?.invoice_email || organizationData?.email || 'gerencia@zibamed.com';
-  const phone = organizationData?.phone || '+1829-404-7754';
+  const companyName = organizationData?.name || '';
+  const rnc = organizationData?.rnc || '';
+  const address = organizationData?.address || '';
+  const city = organizationData?.city || '';
+  const addressNumber = organizationData?.address_number || '';
+  const website = organizationData?.website || '';
+  const invoiceEmail = organizationData?.invoice_email || organizationData?.email || '';
+  const phone = organizationData?.phone || '';
 
   const subtotal = quotation.subtotal || 0;
   const taxAmount = quotation.tax_amount || (subtotal * (quotation.tax_rate || 0) / 100);
@@ -285,13 +285,13 @@ export const generateQuotationPrintHTMLOLD2 = (quotation, formatCurrency, format
         </div>
         
         <div class="company-info-center">
-          <div class="company-name">${companyName}</div>
-          <div class="company-rnc">RNC ${rnc}</div>
+          ${companyName ? `<div class="company-name">${companyName}</div>` : ''}
+          ${rnc ? `<div class="company-rnc">RNC ${rnc}</div>` : ''}
           <div class="company-address">
-            ${fullAddress}<br>
-            ${phone}<br>
-            ${website}<br>
-            ${invoiceEmail}
+            ${fullAddress ? `${fullAddress}<br>` : ''}
+            ${phone ? `${phone}<br>` : ''}
+            ${website ? `${website}<br>` : ''}
+            ${invoiceEmail ? `${invoiceEmail}` : ''}
           </div>
         </div>
         
@@ -418,7 +418,7 @@ export const generateQuotationPrintHTMLOLD = (quotation, formatCurrency, formatD
       : `https://sistema-gestion-api.onrender.com${organizationData.stamp_url}`;
   }
   
-  const companyName = organizationData?.name || 'Empresa';
+  const companyName = organizationData?.name || '';
   const rnc = organizationData?.rnc || '';
   const address = organizationData?.address || '';
   const city = organizationData?.city || '';
@@ -638,7 +638,7 @@ export const generateQuotationPrintHTMLOLD = (quotation, formatCurrency, formatD
       <div class="invoice-header">
         <div class="company-section">
           ${logoUrl ? `<img src="${logoUrl}" alt="${companyName}" class="company-logo" />` : ''}
-          <div class="company-name">${companyName}</div>
+          ${companyName ? `<div class="company-name">${companyName}</div>` : ''}
           ${rnc ? `<div class="company-rnc">RNC: ${rnc}</div>` : ''}
           <div class="company-address">
             ${fullAddress ? `${fullAddress}<br>` : ''}
