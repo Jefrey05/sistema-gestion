@@ -80,6 +80,8 @@ class User(Base):
     phone = Column(String)
     avatar = Column(String)  # URL o path de imagen
     last_login = Column(DateTime)
+    failed_login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=get_rd_now)
     updated_at = Column(DateTime, default=get_rd_now, onupdate=get_rd_now)
     

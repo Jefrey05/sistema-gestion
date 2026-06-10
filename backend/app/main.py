@@ -4,6 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from .database import engine, Base
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from sqlalchemy import text
 from .routers import auth, products, categories, suppliers, inventory
 from .routers import clients, quotations, sales, rentals, dashboard, organizations, summary, notifications, failures
 
@@ -16,9 +20,28 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Sistema de Gestión Empresarial",
-    description="API completa para gestión empresarial: inventario, ventas, cotizaciones, alquileres y más",
     version="2.0.0"
 )
+
+# Configurar Rate Limiter (SlowAPI)
+from .limiter import limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+@app.on_event("startup")
+def startup_event():
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER DEFAULT 0;"))
+            conn.commit()
+        except:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN locked_until TIMESTAMP;"))
+            conn.commit()
+        except:
+            pass
 
 # Configurar CORS - Permitir frontend en producción y desarrollo
 import os

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -10,6 +10,8 @@ from ..auth import get_current_active_user
 # Usar modelos extendidos por defecto
 from .. import schemas_extended as schemas
 from .. import models_extended as models
+from ..limiter import limiter
+import datetime
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -68,23 +70,43 @@ def register(
 
 
 @router.post("/login", response_model=schemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     print(f"🔐 Intento de login:")
     print(f"   Username/Email: {form_data.username}")
     
+    # 1. Chequear bloqueo previo
+    user_check = db.query(models.User).filter(
+        (models.User.username == form_data.username) | (models.User.email == form_data.username)
+    ).first()
+
+    if user_check and user_check.locked_until:
+        # Usa get_rd_now si es posible, o utcnow()
+        from ..timezone_utils import get_rd_now
+        now = get_rd_now()
+        if user_check.locked_until > now:
+            raise HTTPException(
+                status_code=403,
+                detail="Cuenta bloqueada temporalmente por demasiados intentos fallidos. Inténtalo en 15 minutos."
+            )
+        else:
+            user_check.locked_until = None
+            user_check.failed_login_attempts = 0
+            db.commit()
+
+    # 2. Autenticar
     user = auth.authenticate_user(db, form_data.username, form_data.password)
     
     if not user:
         print(f"❌ Login fallido: Usuario no encontrado o contraseña incorrecta")
-        # Verificar si el usuario existe
-        user_check = db.query(models.User).filter(
-            (models.User.username == form_data.username) | (models.User.email == form_data.username)
-        ).first()
+        # Incrementar fallos si el usuario existe
         if user_check:
-            print(f"   ⚠️ Usuario existe pero contraseña incorrecta")
-            print(f"   User ID: {user_check.id}, Email: {user_check.email}, Username: {user_check.username}")
-        else:
-            print(f"   ⚠️ Usuario no existe en la base de datos")
+            user_check.failed_login_attempts = (user_check.failed_login_attempts or 0) + 1
+            if user_check.failed_login_attempts >= 5:
+                from ..timezone_utils import get_rd_now
+                user_check.locked_until = get_rd_now() + datetime.timedelta(minutes=15)
+            db.commit()
+            print(f"   ⚠️ Incrementando fallos: {user_check.failed_login_attempts}/5")
         
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -95,13 +117,17 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not user.is_active:
         print(f"❌ Login fallido: Usuario inactivo (ID: {user.id})")
         raise HTTPException(status_code=400, detail="Usuario inactivo")
+        
+    # 3. Éxito: Resetear fallos
+    user.failed_login_attempts = 0
+    user.locked_until = None
+    db.commit()
     
     print(f"✅ Login exitoso:")
     print(f"   User ID: {user.id}")
     print(f"   Email: {user.email}")
     print(f"   Username: {user.username}")
     print(f"   Role: {user.role}")
-    print(f"   Organization ID: {user.organization_id}")
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth.create_access_token(
