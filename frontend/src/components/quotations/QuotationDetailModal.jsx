@@ -93,7 +93,7 @@ const QuotationDetailModal = ({ quotation, onClose }) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Cotización #${quotation.id}</title>
+        <title>Cotización #${quotation.quotation_number || quotation.id}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
@@ -125,7 +125,7 @@ const QuotationDetailModal = ({ quotation, onClose }) => {
       <body>
         <div class="header">
           <h1>COTIZACIÓN</h1>
-          <p>Cotización #${quotation.id} | Fecha: ${formatDate(quotation.created_at)}</p>
+          <p>Cotización #${quotation.quotation_number || quotation.id} | Fecha: ${formatDate(quotation.created_at)}</p>
         </div>
 
         <div class="validity">

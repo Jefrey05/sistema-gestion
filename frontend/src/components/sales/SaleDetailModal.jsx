@@ -48,7 +48,7 @@ const SaleDetailModal = ({ sale, onClose }) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Factura #${sale.id}</title>
+        <title>Factura #${sale.sale_number || sale.id}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
@@ -79,7 +79,7 @@ const SaleDetailModal = ({ sale, onClose }) => {
       <body>
         <div class="header">
           <h1>FACTURA</h1>
-          <p>Factura #${sale.id} | Fecha: ${formatDate(sale.created_at)}</p>
+          <p>Factura #${sale.sale_number || sale.id} | Fecha: ${formatDate(sale.created_at)}</p>
         </div>
 
         <div class="invoice-info">
@@ -193,7 +193,7 @@ const SaleDetailModal = ({ sale, onClose }) => {
         <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-3xl font-bold mb-2">Factura #{sale.id}</h2>
+              <h2 className="text-3xl font-bold mb-2">Factura #{sale.sale_number || sale.id}</h2>
               <p className="text-blue-100 flex items-center gap-2">
                 <Calendar size={16} />
                 {formatDateTime(sale.created_at, { 

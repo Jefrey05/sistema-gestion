@@ -80,7 +80,7 @@ const RentalDetailModal = ({ rental, onClose, isQuotation = false }) => {
         <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white p-6">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-3xl font-bold mb-2">Alquiler #{rental.id}</h2>
+              <h2 className="text-3xl font-bold mb-2">Alquiler #{rental.rental_number || rental.id}</h2>
               <p className="text-orange-100 flex items-center gap-2">
                 <Calendar size={16} />
                 {formatDateTime(rental.created_at, { 

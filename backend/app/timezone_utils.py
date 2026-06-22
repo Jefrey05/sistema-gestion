@@ -13,9 +13,9 @@ def get_rd_now() -> datetime:
     """
     Obtiene la fecha y hora actual en zona horaria de República Dominicana
     Returns:
-        datetime: Fecha y hora actual en RD (UTC-4)
+        datetime: Fecha y hora actual en RD (UTC-4) sin timezone para compatibilidad DB
     """
-    return datetime.now(RD_TIMEZONE)
+    return datetime.now(RD_TIMEZONE).replace(tzinfo=None)
 
 
 def utc_to_rd(utc_datetime: datetime) -> datetime:

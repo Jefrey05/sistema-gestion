@@ -138,7 +138,7 @@ const ClientTransactionsModal = ({ isOpen, onClose, client }) => {
                       <div key={sale.id} className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-green-300 transition-all">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <p className="font-bold text-gray-900">Venta #{sale.id}</p>
+                            <p className="font-bold text-gray-900">Venta #{sale.sale_number || sale.id}</p>
                             <p className="text-sm text-gray-500">
                               {new Date(sale.created_at || sale.sale_date).toLocaleDateString('es-ES')}
                             </p>
@@ -186,7 +186,7 @@ const ClientTransactionsModal = ({ isOpen, onClose, client }) => {
                       <div key={rental.id} className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <p className="font-bold text-gray-900">Alquiler #{rental.id}</p>
+                            <p className="font-bold text-gray-900">Alquiler #{rental.rental_number || rental.id}</p>
                             <p className="text-sm text-gray-500">
                               {new Date(rental.start_date).toLocaleDateString('es-ES')} - {new Date(rental.end_date).toLocaleDateString('es-ES')}
                             </p>
