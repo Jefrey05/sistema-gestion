@@ -81,9 +81,9 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
     ).first()
 
     if user_check and user_check.locked_until:
-        # Usa get_rd_now si es posible, o utcnow()
-        from ..timezone_utils import get_rd_now
-        now = get_rd_now()
+        # Usar utcnow() (timezone naive) para comparar con lo que devuelve SQLAlchemy
+        import datetime
+        now = datetime.datetime.utcnow()
         if user_check.locked_until > now:
             raise HTTPException(
                 status_code=403,
@@ -103,8 +103,8 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
         if user_check:
             user_check.failed_login_attempts = (user_check.failed_login_attempts or 0) + 1
             if user_check.failed_login_attempts >= 5:
-                from ..timezone_utils import get_rd_now
-                user_check.locked_until = get_rd_now() + datetime.timedelta(minutes=15)
+                import datetime
+                user_check.locked_until = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
             db.commit()
             print(f"   ⚠️ Incrementando fallos: {user_check.failed_login_attempts}/5")
         

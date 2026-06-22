@@ -1,0 +1,116 @@
+Created At: 2026-05-28T19:33:28Z
+Completed At: 2026-05-28T19:33:28Z
+File Path: `file:///g:/proyecto%20deret/styles.css`
+Total Lines: 1588
+Total Bytes: 33562
+Showing lines 1 to 800
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: /* ==========================================================================
+2:    UVU CLUB INSPIRED PREMIUM LIGHT THEME DESIGN SYSTEM & CORE STYLESHEET
+3:    ========================================================================== */
+4: 
+5: /* Typography Imports */
+6: @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800;900&family=Space+Mono&display=swap');
+7: 
+8: /* CSS Variables for Premium Editorial Aesthetics */
+9: :root {
+10:   /* Color Palette - HSL Custom tailored for High-End Minimalist Light Theme */
+11:   --bg-primary: hsl(0, 0%, 100%);           /* Pure White Background */
+12:   --bg-secondary: hsl(0, 0%, 98%);         /* Ultra-Light Off-White */
+13:   --bg-card: hsl(0, 0%, 99%);              /* Soft Matte White for products */
+14:   --bg-modal: hsl(0, 0%, 100%);            /* White Modal Panel */
+15:   --border-ultra-light: hsla(0, 0%, 0%, 0.06); /* Super fine border */
+16:   --border-light: hsla(0, 0%, 0%, 0.12);       /* Subtle focus border */
+17:   --text-primary: hsl(0, 0%, 0%);          /* True Black Headings */
+18:   --text-secondary: hsl(0, 0%, 35%);       /* Charcoal Body Text */
+19:   --text-muted: hsl(0, 0%, 60%);           /* Silver Grey Labels */
+20:   --accent-color: hsl(0, 0%, 0%);          /* Active Black Highlight */
+21:   
+22:   /* Fonts */
+23:   --font-heading: 'Outfit', sans-serif;
+24:   --font-body: 'Inter', sans-serif;
+25:   --font-mono: 'Space Mono', monospace;
+26:   
+27:   /* Layout */
+28:   --header-height: 80px;
+29:   --container-max-width: 1400px;
+30:   --radius-minimal: 2px;
+31:   --radius-bu
+<truncated 18187 bytes>
+ border-radius: var(--radius-minimal);
+726:   width: 90%;
+727:   max-width: 900px;
+728:   max-height: 90vh;
+729:   overflow-y: auto;
+730:   position: relative;
+731:   transform: scale(0.97) translateY(15px);
+732:   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+733:   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+734: }
+735: 
+736: .modal-overlay.active .modal-box {
+737:   transform: scale(1) translateY(0);
+738: }
+739: 
+740: /* Close Button modal */
+741: .modal-close-btn {
+742:   position: absolute;
+743:   top: 25px;
+744:   right: 25px;
+745:   z-index: 10;
+746:   width: 36px;
+747:   height: 36px;
+748:   border-radius: 50%;
+749:   background-color: rgba(0, 0, 0, 0.03);
+750:   border: 1px solid var(--border-ultra-light);
+751:   color: var(--text-primary);
+752:   display: flex;
+753:   align-items: center;
+754:   justify-content: center;
+755: }
+756: 
+757: .modal-close-btn:hover {
+758:   background-color: var(--text-primary);
+759:   color: var(--bg-primary);
+760:   border-color: var(--text-primary);
+761:   transform: rotate(90deg);
+762: }
+763: 
+764: .modal-close-svg {
+765:   width: 12px;
+766:   height: 12px;
+767:   fill: currentColor;
+768: }
+769: 
+770: /* Modal Columns */
+771: .modal-grid-inner {
+772:   display: grid;
+773:   grid-template-columns: 1fr 1fr;
+774:   height: 100%;
+775: }
+776: 
+777: @media (max-width: 768px) {
+778:   .modal-grid-inner {
+779:     grid-template-columns: 1fr;
+780:   }
+781: }
+782: 
+783: /* Left Image Panel */
+784: .modal-media-panel {
+785:   position: relative;
+786:   background-color: #fdfdfd;
+787:   aspect-ratio: 1 / 1.05;
+788:   border-right: 1px solid var(--border-ultra-light);
+789: }
+790: 
+791: .modal-product-image {
+792:   width: 100%;
+793:   height: 100%;
+794:   object-fit: cover;
+795: }
+796: 
+797: /* Right Options Panel */
+798: .modal-options-panel {
+799:   padding: 50px;
+800:   display: flex;
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
